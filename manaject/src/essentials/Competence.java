@@ -1,6 +1,5 @@
 package essentials;
 
-import java.util.Vector;
 
 public class Competence {
 	

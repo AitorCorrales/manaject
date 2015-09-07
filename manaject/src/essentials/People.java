@@ -17,9 +17,10 @@
  */
 
 package essentials ;
-
-import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.vocabulary.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.VCARD;
 
 /** Tutorial 4 - create a model and write it in XML form to standard out
  */
@@ -45,7 +46,8 @@ public class People extends Object {
 
         // create the resource
         //   and add the properties cascading style
-        Resource johnSmith 
+        @SuppressWarnings("unused")
+		Resource johnSmith 
           = model.createResource(personURI)
                  .addProperty(VCARD.FN, fullName)
                  .addProperty(VCARD.N, 
