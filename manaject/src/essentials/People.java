@@ -17,6 +17,11 @@
  */
 
 package essentials ;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -34,9 +39,12 @@ public class People extends Object {
     static String title        = "An Introduction to RDF and the Jena API";
     static String date         = "23/01/2001";
     
-    public static void main (String args[]) {
+    public static void main (String args[]) throws FileNotFoundException {
     
         // some definitions
+    	File file = new File("C:/Users/aitor/Example/file.rdf");
+    	OutputStream out = new FileOutputStream(file);
+    	
         String personURI    = "http://somewhere/JohnSmith";
         String givenName    = "John";
         String familyName   = "Smith";
@@ -56,7 +64,7 @@ public class People extends Object {
                                    .addProperty(VCARD.Family, familyName));
         
         // now write the model in XML form to a file
-        model.write(System.out,"N-TRIPLES");
+        model.write(out);
     }
 
 }
