@@ -21,3 +21,4 @@ public class Recommended {
 	}
 
 }
+//key refers to the primary key which identifies each person
