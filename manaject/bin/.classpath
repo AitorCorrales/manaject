@@ -270,5 +270,6 @@
 	<classpathentry kind="lib" path="C:/Users/aitor/Downloads/stardog-3.1.4/client/api/xz-1.4.jar"/>
 	<classpathentry kind="lib" path="C:/Users/aitor/Downloads/stardog-3.1.4/server/dbms/slf4j-api-1.7.7.jar"/>
 	<classpathentry kind="lib" path="C:/Users/aitor/Downloads/stardog-3.1.4/server/dbms/slf4j-jdk14-1.7.7.jar"/>
+	<classpathentry kind="lib" path="C:/xampp/tomcat/lib/servlet-api.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
