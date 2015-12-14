@@ -1,12 +1,12 @@
 package essentials;
 
 import utils.UtilFunctions;
+import utils.PrintFunctions;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 
 import com.complexible.stardog.api.ConnectionConfiguration;
@@ -16,7 +16,10 @@ import com.complexible.stardog.api.UpdateQuery;
 import com.complexible.stardog.jena.SDJenaFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
+//¿HAY QUE PONER EL .TTL AL FINAL DE LOS URI PARA QUE ENTRE?
 public class DatabaseManagement {
+	
+	public static PrintFunctions prints = new PrintFunctions();
 
 	public Connection connectToStardog(String dbname) throws Exception {
 
@@ -53,7 +56,7 @@ public class DatabaseManagement {
 
 		// Query that we will run against the data we just loaded
 		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x <http://www.w3.org/2001/vcard-rdf/3.0#FN> " + "\"" + name
+				+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#Full_Name> " + "\"" + name
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -61,15 +64,14 @@ public class DatabaseManagement {
 
 		// ... and run it
 		TupleQueryResult aExec = aQuery.execute();
-		printResults(aExec);
+		prints.printResults(aExec);
 
 		// always close the execution
 		aExec.close();
 		aModel.close();
 
 	}
-
-	public void findPersonByCompetence(Connection aConn, String comp)
+	public boolean findPersonByEmail(Connection aConn, String email)
 			throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
@@ -81,15 +83,46 @@ public class DatabaseManagement {
 
 		// Query that we will run against the data we just loaded
 		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x <C:/Users/aitor/Downloads/ttl/SkillOntology.ttl#Name> "
-				+ "\"" + comp + "\"" + ". " + "\n" + "}";
+				+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
+				+ "\"" + "\n" + "}";
 
 		// Create a query...
 		SelectQuery aQuery = aConn.select(aQueryString);
 
 		// ... and run it
 		TupleQueryResult aExec = aQuery.execute();
-		printResults(aExec);
+		if (aExec.toString().equals("")){
+			aExec.close();
+			aModel.close();
+			return false;
+		}
+		// always close the execution
+		aExec.close();
+		aModel.close();
+		return true;
+	}
+
+	public void findPersonByCompetence(Connection aConn, String comp)
+			throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		// start a transaction before adding the data. This is not required, but
+		// it is faster to group the entire add into a single transaction rather
+		// than rely on the auto commit of the underlying stardog connection.
+		aModel.begin();
+		// Query that we will run against the data we just loaded
+		String aQueryString = "SELECT ?x WHERE {\n"
+				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "+ "\"" + comp + "\"" + ". " + "\n"
+				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "+ "?x" + ". " + "\n"
+				+ "}";
+
+		// Create a query...
+		SelectQuery aQuery = aConn.select(aQueryString);
+
+		// ... and run it
+		TupleQueryResult aExec = aQuery.execute();
+		prints.printResults(aExec);
 
 		// always close the execution
 		aExec.close();
@@ -107,12 +140,24 @@ public class DatabaseManagement {
 		Iterator<Competence> it = comp.iterator();
 
 		while (it.hasNext()) {
-			String aQueryString = "SELECT ?x WHERE {\n"
-					+ "?x <C:/Users/aitor/Downloads/ttl/SkillOntology.ttl#Name> "
+			/*String aQueryString = "SELECT ?x WHERE {\n"
+					+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "
 					+ "\"" + it.next().getComp() + "\"" + ". " + "\n" + "}";
+					////////////////////////////////////////////////////////////////
+			String aQueryString = "SELECT ?y WHERE {\n"
+					+ "?y skill:Name "+ "\"" + it.next().getComp() + "\"" + "\n"
+					+ "}";*/
+			
+			//Note: Si en vez de pedir el email, pedimos el recurso, tenemos acceso a todo el recurso entero (Nombre, competencias...)
+			
+			String aQueryString = "SELECT ?x WHERE {\n"
+					+ "?y skill:Name "+ "\"" + it.next().getComp() + "\"" + ". " + "\n"
+					+ "?y jobSeeker:email "+ "?x" + ". " + "\n"
+					+ "}";
+			
 			SelectQuery aQuery = aConn.select(aQueryString);
 			TupleQueryResult aExec = aQuery.execute();
-			printResults(aExec);
+			prints.printResults(aExec);
 			aExec.close();
 			System.out.println("------------------------------");
 		}
@@ -140,16 +185,60 @@ public class DatabaseManagement {
 
 		return vecO;
 	}
+	public Vector<String> finalList (Connection aConn, Vector<Competence> vec) throws Exception{
+		return recommenderIntersection(recListLikes(),recListNeeds(aConn, vec));
+	}
 
-	public void insertPersonFullName(Connection aConn, String name)
+	private Vector<String> recommenderIntersection(
+			Vector<String> listLikes, Vector<String> listNeeds) {
+		// TODO Auto-generated method stub
+		
+		return null;
+	}
+
+	private Vector<String> recListNeeds(Connection aConn,
+			Vector<Competence> vec) throws Exception {
+		// TODO Auto-generated method stub
+		return findPeopleByCompetences(aConn, vec);
+	}
+
+	private Vector<String> recListLikes() {
+		Vector <String> rec = new Vector <String>();
+		return rec;
+	}
+
+	public void insertPersonFullName(Connection aConn, String user, String name)
+			throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + user + "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#Full_Name> " + "\"" + name
+				+ "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+	}
+	public void insertPersonPassword(Connection aConn, String password)
 			throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
 		String aQueryString = "insert data\n" + "{\n" + "<http://somewhere"
-				+ "/" + name.replaceAll("\\s", "") + "> "
-				+ "<http://www.w3.org/2001/vcard-rdf/3.0#FN> " + "\"" + name
+				+ "/" + password.replaceAll("\\s", "") + "> "
+				+ "<http://www.w3.org/2001/vcard-rdf/3.0#PW> " + "\"" + password
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -165,7 +254,7 @@ public class DatabaseManagement {
 		aModel.close();
 	}
 
-	public void insertPersonCompetence(Connection aConn, String name,
+	public void insertPersonCompetence(Connection aConn, String user,
 			String competence) throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
@@ -175,11 +264,21 @@ public class DatabaseManagement {
 		/*
 		 * INSERT DATA { GRAPH <http://somewhere/bookStore> {
 		 * <http://example/book1> ns:price 42 } }
+		 * 
+		 * String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + user.replaceAll("\\s", "") + "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology.ttl#Name> "
+				+ "\"" + competence + "\"" + "\n" + "}";
 		 */
+		
+		/*String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + email + "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
+				+ "\"" + "\n" + "}";*/
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://somewhere"
-				+ "/" + name.replaceAll("\\s", "") + "> "
-				+ "<C:/Users/aitor/Downloads/ttl/SkillOntology.ttl#Name> "
+		String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + user + "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "
 				+ "\"" + competence + "\"" + "\n" + "}";
 
 		// Create a query...
@@ -196,27 +295,68 @@ public class DatabaseManagement {
 		aModel.close();
 	}
 
-	public void insertPersonCompetences(String name,
+	public void insertPersonCompetences(String user,
 			Vector<Competence> competences) throws Exception {
 
 		Iterator<Competence> it = competences.iterator();
 
 		while (it.hasNext()) {
-			insertPersonCompetence(connectToStardog("myDb"), name, it.next()
+			insertPersonCompetence(connectToStardog("myDb"), user, it.next()
 					.getComp());
 		}
 	}
 
-	public void printResults(TupleQueryResult res)
-			throws QueryEvaluationException {
-		try {
-			while (res.hasNext()) {
-				System.out.println(res.next().toString());
-			}
-		} finally {
-			res.close();
-		}
+	public void insertPersonEmail(Connection aConn, String email) throws Exception{
+		// TODO Auto-generated method stub
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + email + "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
+				+ "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+		
 	}
+
+	//AÑADIR A LA ONTOLOGÍA EL ATRIBUTO "CONTRASEÑA" PARA PODER HACER EL MATCHING ENTRE USUARIO Y CONTRASEÑA
+	//TODO: hacer pruebas
+	public boolean passOfUser(Connection aConn, String user,
+			String pass) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "SELECT ?x WHERE {\n"
+				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + user + "\"" + ". " + "\n"
+				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#password> " + "?x" + ". " + "\n"
+				+ "}";
+
+		SelectQuery aQuery = aConn.select(aQueryString);
+		TupleQueryResult aExec = aQuery.execute();
+		
+		if(pass.equals(aExec.toString())){
+			aExec.close();
+			aModel.close();
+			return true;
+		}
+		
+		aExec.close();
+		aModel.close();
+		return false;
+	}
+
 
 	/*
 	 * SELECT ?x ?dumbassValue ?uglyValue WHERE { { ?x :hasCompetence "Dumbass"

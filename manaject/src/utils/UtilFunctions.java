@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import java.lang.Math;
+
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 
@@ -57,17 +59,24 @@ public class UtilFunctions {
 	 * i.next(); if (m.getKey() == person) punct += (double) m.getValue(); }
 	 * return punct; }
 	 */
+	
+	//La puntuacion de una persona se va a calcular mediante el angulo del coseno de los dos vectores
 	public double calculateSinglePerson(Vector<Competence> comp,
 			Vector<String> personC) {
 		Iterator<Competence> it = comp.iterator();
-		double punct = 0.0;
+		double dividendo = 0.0;
+		double divisorPersona = 0.0;
+		double divisorComp = 0.0;
+		
 		while (it.hasNext()) {
 			Competence next = it.next();
 			if (personC.contains(next.getComp())) {
-				punct += next.getPunctuation();
+				dividendo += next.getPunctuation();
+				divisorPersona += 1;
 			}
+			divisorComp += Math.pow(next.getPunctuation(),2);
 		}
-		return punct;
+		return (dividendo/(Math.sqrt(divisorPersona)*Math.sqrt(divisorComp)));
 	}
 
 	public String prepareStatementSelect(Vector<Competence> vec) {
@@ -75,9 +84,8 @@ public class UtilFunctions {
 			return "";
 		Iterator<Competence> it = vec.iterator();
 		String statement = "SELECT ?x ?y WHERE {\n"
-				+ "?j <http://www.w3.org/2001/vcard-rdf/3.0#FN> ?x .\n"
-				+ "?j <C:/Users/aitor/Downloads/ttl/SkillOntology.ttl#Name> "
-				+ "?y\n" + "FILTER (?y=" + "\"" + it.next().getComp() + "\""
+				+ "?j jobSeeker:email ?x .\n"
+				+ "?j skill:Name " + "?y\n" + "FILTER (?y=" + "\"" + it.next().getComp() + "\""
 				+ "^^xsd:string ";
 		while (it.hasNext()) {
 			statement = statement + "|| ?y=" + "\"" + it.next().getComp()
@@ -147,6 +155,27 @@ public class UtilFunctions {
 			}
 		}
 		return vec;
+	}
+	public double realPunctuationCalculation(Vector<Competence> comp,
+			Vector<String> personC) {
+		/*Iterator<Competence> it = comp.iterator();
+		double punct = 0.0;
+		while (it.hasNext()) {
+			Competence next = it.next();
+			if (personC.contains(next.getComp())) {
+				punct += next.getPunctuation();
+			}
+		}
+		return punct; */
+		
+		//Para calcular la similaridad entre dos vectores de objetos vamos a utilizar A Survey of Approaches to Designing Recommender Systems
+		//Sistema de recomendación por gustos
+		
+		
+		//Sistema de recomendación por necesidades
+		
+		
+		return 0.0;
 	}
 
 }

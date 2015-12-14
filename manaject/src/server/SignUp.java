@@ -17,15 +17,15 @@ public class SignUp extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		//TODO: comprobar que no está el correo ya registrado en la base de datos
-		String user = req.getParameter("correo");
-		String pass = req.getParameter("pass1");
+		//String user = req.getParameter("correo");
+		//String pass = req.getParameter("pass1");
 		String statement = "de momento";
 		//statement = "SELECT * FROM users WHERE " + user + "=correo";
 		if (!statement.equals("")) {
 			PrintWriter out = resp.getWriter();
 			out.println("<html>");
 			out.println("<body>");
-			out.println("<a href='http://localhost:8080/manaject/SEM/html/index.html'>" + "Pulse aqu&iacute; para volver a la p&aacute;gina &iacute;ndice" + "</a>");
+			out.println("<a href='http://localhost:8080/manaject/SEM/html/index.html'>" + "Pulse aqu&iacute; para volver a la p&aacute;gina de inicio" + "</a>");
 			out.println("</body>");
 			out.println("</html>");
 		} else {

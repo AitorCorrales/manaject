@@ -3,6 +3,9 @@ package utils;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
+
 import essentials.Person;
 import essentials.Recommended;
 
@@ -24,6 +27,17 @@ public class PrintFunctions {
 			System.out.println(p.getFullname());
 			printVector(p.getCompetences());
 
+		}
+	}
+	
+	public void printResults(TupleQueryResult res)
+			throws QueryEvaluationException {
+		try {
+			while (res.hasNext()) {
+				System.out.println(res.next().toString());
+			}
+		} finally {
+			res.close();
 		}
 	}
 

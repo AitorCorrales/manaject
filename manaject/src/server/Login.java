@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 public class Login extends HttpServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6781398296066531034L;
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		String user = req.getParameter("correo");
@@ -17,7 +21,7 @@ public class Login extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 			out.println("<html>");
 			out.println("<body>");
-			out.println("<a href='http://localhost:8080/manaject/SEM/html/Aptitudes.html'>" + "Pulse aqu&iacute; para continuar al perfil" + "</a>");
+			out.println("<a href='projGlobal.html'>" + "Pulse aqu&iacute; para continuar al inicio" + "</a>");
 			out.println("</body>");
 			out.println("</html>");
 		} else {
@@ -30,7 +34,8 @@ public class Login extends HttpServlet {
 		PrintWriter out = resp.getWriter();
 		out.println("<html>");
 		out.println("<body>");
-		out.println("<t1>" + msg + "</t1>");
+		//out.println("<t1>" + msg + "</t1>");
+		out.println("<a href='SignIn.html'>" + "Pulse aqu&iacute; para volver a iniciar sesi&oacute;n" + "</a>");
 		out.println("</body>");
 		out.println("</html>");
 	}

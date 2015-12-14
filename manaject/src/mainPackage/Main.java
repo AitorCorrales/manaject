@@ -54,25 +54,34 @@ public class Main {
 		
 		try {
 
-			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
-			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
-			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
+			//dbm.insertPersonEmail(dbm.connectToStardog("myDb"), "motroco@gmail.com");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "motroco@gmail.com", "Motroco Moraza");
+			//
+			//	dbm.insertPersonCompetences("motroco@gmail.com", comp);
+			//dbm.insertPersonCompetences("motroco@gmail.com", comp2);
+			//	dbm.insertPersonEmail(dbm.connectToStardog("myDb"), "babatunde@gmail.com");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
+			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
+			//	dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "babatunde@gmail.com", "Babatunde Moraza");
 
-			dbm.insertPersonCompetences("Babatunde Moraza", comp2);
-			dbm.insertPersonCompetences("William Wilson", comp3);
-			dbm.insertPersonCompetences("Santiago Santiago", comp);
+			//		dbm.insertPersonCompetences("motroco@gmail.com", comp);
+			//		dbm.insertPersonCompetences("motroco@gmail.com", comp2);
+			//		dbm.insertPersonCompetences("babatunde@gmail.com", comp3);
+			//		dbm.insertPersonCompetences("babatunde@gmail.com", comp2);
+			//dbm.insertPersonCompetences("Santiago Santiago", comp);
 			
 			// dbm.insertPersonCompetences("Kevin Vegas", comp);
-			// dbm.findPeopleByEachCompetence(dbm.connectToStardog("myDb"),
-			// comp);
+			dbm.findPeopleByEachCompetence(dbm.connectToStardog("myDb"), search);
 			// System.out.println(func.prepareStatementSelect(comp));
-			// hash = dbm.findPeopleByCompetences(dbm.connectToStardog("myDb"),
-			// comp);
 			// p = func.separateIntoLists(dbm.findPeopleByCompetences(
 			// dbm.connectToStardog("myDb"), comp));
 			rec = func.getEstablishedCompetencePunctuation(
 					func.separateIntoLists(dbm.findPeopleByCompetences(
-							dbm.connectToStardog("myDb"), comp)), comp);
+							dbm.connectToStardog("myDb"), search)), search);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
