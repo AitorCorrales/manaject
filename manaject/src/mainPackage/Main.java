@@ -74,6 +74,10 @@ public class Main {
 			//		dbm.insertPersonCompetences("babatunde@gmail.com", comp2);
 			//dbm.insertPersonCompetences("Santiago Santiago", comp);
 			
+			//dbm.insertPersonPassword(dbm.connectToStardog("myDb"), "babatunde@gmail.com", "babatunde");
+			
+			System.out.println(dbm.findPersonFullName(dbm.connectToStardog("myDb"), "babatunde@gmail.com"));
+			
 			// dbm.insertPersonCompetences("Kevin Vegas", comp);
 			//boolean pf = dbm.findPersonByEmail(dbm.connectToStardog("myDb"), "babatunde@gmail.com");
 			//dbm.findPeopleByEachCompetence(dbm.connectToStardog("myDb"), search);

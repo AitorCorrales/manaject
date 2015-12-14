@@ -56,7 +56,7 @@ public class DatabaseManagement {
 
 		// Query that we will run against the data we just loaded
 		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#Full_Name> " + "\"" + name
+				+ "?x jobSeeker:Full_Name " + "\"" + name
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -69,6 +69,39 @@ public class DatabaseManagement {
 		// always close the execution
 		aExec.close();
 		aModel.close();
+
+	}
+	public String findPersonFullName(Connection aConn, String user)
+			throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		// start a transaction before adding the data. This is not required, but
+		// it is faster to group the entire add into a single transaction rather
+		// than rely on the auto commit of the underlying stardog connection.
+		aModel.begin();
+
+		// Query that we will run against the data we just loaded
+		String aQueryString = "SELECT ?x WHERE {\n"
+				+ "<http://people" + "/" + user + "> " + "jobSeeker:Full_Name "
+				+ "?x" + "\n" + "}";
+
+		// Create a query...
+		SelectQuery aQuery = aConn.select(aQueryString);
+
+		// ... and run it
+		TupleQueryResult aExec = aQuery.execute();
+		if(aExec.hasNext()){
+			String returnable = aExec.next().toString();
+			aExec.close();
+			aModel.close();
+			return returnable;
+		}
+
+		// always close the execution
+		aExec.close();
+		aModel.close();
+		return "";
 
 	}
 	public boolean findPersonByEmail(Connection aConn, String email)
@@ -215,7 +248,7 @@ public class DatabaseManagement {
 
 		String aQueryString = "insert data\n" + "{\n" + "<http://people"
 				+ "/" + user + "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#Full_Name> " + "\"" + name
+				+ "jobSeeker:Full_Name " + "\"" + name
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -230,15 +263,15 @@ public class DatabaseManagement {
 		aConn.commit();
 		aModel.close();
 	}
-	public void insertPersonPassword(Connection aConn, String password)
+	public void insertPersonPassword(Connection aConn, String user, String password)
 			throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://somewhere"
-				+ "/" + password.replaceAll("\\s", "") + "> "
-				+ "<http://www.w3.org/2001/vcard-rdf/3.0#PW> " + "\"" + password
+		String aQueryString = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + user + "> "
+				+ "jobSeeker:password " + "\"" + password
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -332,21 +365,21 @@ public class DatabaseManagement {
 
 	//AÑADIR A LA ONTOLOGÍA EL ATRIBUTO "CONTRASEÑA" PARA PODER HACER EL MATCHING ENTRE USUARIO Y CONTRASEÑA
 	//TODO: hacer pruebas
-	public boolean passOfUser(Connection aConn, String user,
+	public boolean findPersonPassword(Connection aConn, String user,
 			String pass) throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + user + "\"" + ". " + "\n"
-				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#password> " + "?x" + ". " + "\n"
+		String aQueryString = "SELECT ?y WHERE {\n"
+				+ "?y " + "jobSeeker:password " + "\"" + pass + "\"" + ". " + "\n"
+				+ "?y " + "jobSeeker:email " + "\"" + user + "\"" + ". " + "\n"
 				+ "}";
 
 		SelectQuery aQuery = aConn.select(aQueryString);
 		TupleQueryResult aExec = aQuery.execute();
 		
-		if(pass.equals(aExec.toString())){
+		if(aExec.hasNext()){
 			aExec.close();
 			aModel.close();
 			return true;

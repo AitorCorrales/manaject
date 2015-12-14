@@ -36,7 +36,7 @@ public class SignUp extends HttpServlet {
 
 					dbm.insertPersonEmail(dbm.connectToStardog("myDb"),
 							req.getParameter("correo"));
-					dbm.insertPersonPassword(dbm.connectToStardog("myDb"),
+					dbm.insertPersonPassword(dbm.connectToStardog("myDb"), req.getParameter("correo"),
 							req.getParameter("pass1"));
 
 					PrintWriter out = resp.getWriter();

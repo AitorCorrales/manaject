@@ -22,17 +22,16 @@ public class Login extends HttpServlet {
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String pass = req.getParameter("pass1");
 		try {
-			if (dbm.findPersonByEmail(dbm.connectToStardog("myDb"), req.getParameter("correo")) && pass.equals("acorrales004")) {
+			if (dbm.findPersonByEmail(dbm.connectToStardog("myDb"), req.getParameter("correo")) && dbm.findPersonPassword(dbm.connectToStardog("myDb"),  req.getParameter("correo"), req.getParameter("pass1"))) {
 				PrintWriter out = resp.getWriter();
 				out.println("<html>");
 				out.println("<body>");
-				out.println("<a href='projGlobal.html'>" + "Pulse aqu&iacute; para continuar al inicio" + "</a>");
+				out.println("<a href='projGlobal.html'>" + "Bienvenido, pulse aqu&iacute; para continuar al inicio" + "</a>");
 				out.println("</body>");
 				out.println("</html>");
 			} else {
-				response(resp, "invalid login");
+				response(resp, "Usuario y/o contrase&ntilde;a incorrecto");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -45,7 +44,7 @@ public class Login extends HttpServlet {
 		PrintWriter out = resp.getWriter();
 		out.println("<html>");
 		out.println("<body>");
-		//out.println("<t1>" + msg + "</t1>");
+		out.println("<t1>" + msg + "</t1>");
 		out.println("<a href='SignIn.html'>" + "Pulse aqu&iacute; para volver a iniciar sesi&oacute;n" + "</a>");
 		out.println("</body>");
 		out.println("</html>");
