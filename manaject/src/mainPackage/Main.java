@@ -75,7 +75,8 @@ public class Main {
 			//dbm.insertPersonCompetences("Santiago Santiago", comp);
 			
 			// dbm.insertPersonCompetences("Kevin Vegas", comp);
-			dbm.findPeopleByEachCompetence(dbm.connectToStardog("myDb"), search);
+			//boolean pf = dbm.findPersonByEmail(dbm.connectToStardog("myDb"), "babatunde@gmail.com");
+			//dbm.findPeopleByEachCompetence(dbm.connectToStardog("myDb"), search);
 			// System.out.println(func.prepareStatementSelect(comp));
 			// p = func.separateIntoLists(dbm.findPeopleByCompetences(
 			// dbm.connectToStardog("myDb"), comp));

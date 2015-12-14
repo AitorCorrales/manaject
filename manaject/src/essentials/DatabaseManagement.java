@@ -83,7 +83,7 @@ public class DatabaseManagement {
 
 		// Query that we will run against the data we just loaded
 		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
+				+ "?x jobSeeker:email " + "\"" + email
 				+ "\"" + "\n" + "}";
 
 		// Create a query...
@@ -91,7 +91,7 @@ public class DatabaseManagement {
 
 		// ... and run it
 		TupleQueryResult aExec = aQuery.execute();
-		if (aExec.toString().equals("")){
+		if (!aExec.hasNext()){
 			aExec.close();
 			aModel.close();
 			return false;

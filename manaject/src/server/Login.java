@@ -2,10 +2,14 @@ package server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import essentials.DatabaseManagement;
+
 
 public class Login extends HttpServlet {
 	
@@ -13,19 +17,26 @@ public class Login extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = -6781398296066531034L;
+	
+	DatabaseManagement dbm = new DatabaseManagement();
+	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String user = req.getParameter("correo");
 		String pass = req.getParameter("pass1");
-		if (user.equals("acorrales004@ikasle.ehu.es") && pass.equals("acorrales004")) {
-			PrintWriter out = resp.getWriter();
-			out.println("<html>");
-			out.println("<body>");
-			out.println("<a href='projGlobal.html'>" + "Pulse aqu&iacute; para continuar al inicio" + "</a>");
-			out.println("</body>");
-			out.println("</html>");
-		} else {
-			response(resp, "invalid login");
+		try {
+			if (dbm.findPersonByEmail(dbm.connectToStardog("myDb"), req.getParameter("correo")) && pass.equals("acorrales004")) {
+				PrintWriter out = resp.getWriter();
+				out.println("<html>");
+				out.println("<body>");
+				out.println("<a href='projGlobal.html'>" + "Pulse aqu&iacute; para continuar al inicio" + "</a>");
+				out.println("</body>");
+				out.println("</html>");
+			} else {
+				response(resp, "invalid login");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
