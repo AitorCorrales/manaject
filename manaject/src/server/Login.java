@@ -24,6 +24,8 @@ public class Login extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			if (dbm.findPersonByEmail(dbm.connectToStardog("myDb"), req.getParameter("correo")) && dbm.findPersonPassword(dbm.connectToStardog("myDb"),  req.getParameter("correo"), req.getParameter("pass1"))) {
+				dbm.deleteSessionToken(dbm.connectToStardog("myDb"), req.getParameter("correo"));
+				dbm.assignNewSessionToken(dbm.connectToStardog("myDb"), req.getParameter("correo"), req.getSession(true).getId());
 				PrintWriter out = resp.getWriter();
 				out.println("<html>");
 				out.println("<body>");

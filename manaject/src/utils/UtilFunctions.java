@@ -1,13 +1,17 @@
 package utils;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
-
 import java.lang.Math;
 
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+
+import com.complexible.stardog.StardogException;
+import com.complexible.stardog.api.Connection;
+import com.complexible.stardog.api.UpdateQuery;
+import com.complexible.stardog.jena.SDJenaFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 
 import essentials.*;
 
@@ -46,12 +50,8 @@ public class UtilFunctions {
 			res.close();
 		}
 	}
-
-	public void resultIntoHashMap(Vector<String> vec,
-			HashMap<String, String> hash) {
-
-	}
-
+	
+	
 	/*
 	 * public double calculateSinglePerson(HashMap<String, Competence> hash,
 	 * String person) { Set set = hash.entrySet(); Iterator i = set.iterator();
@@ -156,26 +156,48 @@ public class UtilFunctions {
 		}
 		return vec;
 	}
-	public double realPunctuationCalculation(Vector<Competence> comp,
-			Vector<String> personC) {
-		/*Iterator<Competence> it = comp.iterator();
-		double punct = 0.0;
-		while (it.hasNext()) {
-			Competence next = it.next();
-			if (personC.contains(next.getComp())) {
-				punct += next.getPunctuation();
-			}
-		}
-		return punct; */
+	public void update(Connection aConn, String user, String paramToChange, String paramValue) throws StardogException{
 		
-		//Para calcular la similaridad entre dos vectores de objetos vamos a utilizar A Survey of Approaches to Designing Recommender Systems
-		//Sistema de recomendación por gustos
+		Model aModel = SDJenaFactory.createModel(aConn);
+		UpdateQuery aQuery;
 		
+		//DELETE 
+		aModel.begin();
+
+		String aQueryDelete = "delete where \n" + "{\n" + "<http://people"
+				+ "/" + user + "> "
+				+ paramToChange + " ?y" + "\n" + "}";
 		
-		//Sistema de recomendación por necesidades
+		 aQuery = aConn.update(aQueryDelete);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple borrado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
 		
+		//INSERT
 		
-		return 0.0;
+		aModel.begin();
+
+		String aQueryInsert = "insert data\n" + "{\n" + "<http://people"
+				+ "/" + user + "> "
+				+ paramToChange + "\" " + paramValue
+				+ "\"" + "\n" + "}";
+		
+		aQuery = aConn.update(aQueryInsert);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple borrado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
 	}
 
 }

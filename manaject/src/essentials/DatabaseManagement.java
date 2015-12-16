@@ -3,12 +3,12 @@ package essentials;
 import utils.UtilFunctions;
 import utils.PrintFunctions;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
 import org.openrdf.query.TupleQueryResult;
 
+import com.complexible.stardog.StardogException;
 import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.api.Connection;
 import com.complexible.stardog.api.SelectQuery;
@@ -18,8 +18,11 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 //¿HAY QUE PONER EL .TTL AL FINAL DE LOS URI PARA QUE ENTRE?
 public class DatabaseManagement {
-	
+
 	public static PrintFunctions prints = new PrintFunctions();
+
+	// IMPORTANTE: ANTES DENTRO DE UNA FUNCION
+	public static UtilFunctions func = new UtilFunctions();
 
 	public Connection connectToStardog(String dbname) throws Exception {
 
@@ -55,9 +58,8 @@ public class DatabaseManagement {
 		aModel.begin();
 
 		// Query that we will run against the data we just loaded
-		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x jobSeeker:Full_Name " + "\"" + name
-				+ "\"" + "\n" + "}";
+		String aQueryString = "SELECT ?x WHERE {\n" + "?x jobSeeker:Full_Name "
+				+ "\"" + name + "\"" + "\n" + "}";
 
 		// Create a query...
 		SelectQuery aQuery = aConn.select(aQueryString);
@@ -71,6 +73,7 @@ public class DatabaseManagement {
 		aModel.close();
 
 	}
+
 	public String findPersonFullName(Connection aConn, String user)
 			throws Exception {
 
@@ -82,16 +85,15 @@ public class DatabaseManagement {
 		aModel.begin();
 
 		// Query that we will run against the data we just loaded
-		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "<http://people" + "/" + user + "> " + "jobSeeker:Full_Name "
-				+ "?x" + "\n" + "}";
+		String aQueryString = "SELECT ?x WHERE {\n" + "<http://people" + "/"
+				+ user + "> " + "jobSeeker:Full_Name " + "?x" + "\n" + "}";
 
 		// Create a query...
 		SelectQuery aQuery = aConn.select(aQueryString);
 
 		// ... and run it
 		TupleQueryResult aExec = aQuery.execute();
-		if(aExec.hasNext()){
+		if (aExec.hasNext()) {
 			String returnable = aExec.next().toString();
 			aExec.close();
 			aModel.close();
@@ -104,6 +106,7 @@ public class DatabaseManagement {
 		return "";
 
 	}
+
 	public boolean findPersonByEmail(Connection aConn, String email)
 			throws Exception {
 
@@ -115,16 +118,15 @@ public class DatabaseManagement {
 		aModel.begin();
 
 		// Query that we will run against the data we just loaded
-		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?x jobSeeker:email " + "\"" + email
-				+ "\"" + "\n" + "}";
+		String aQueryString = "SELECT ?x WHERE {\n" + "?x jobSeeker:email "
+				+ "\"" + email + "\"" + "\n" + "}";
 
 		// Create a query...
 		SelectQuery aQuery = aConn.select(aQueryString);
 
 		// ... and run it
 		TupleQueryResult aExec = aQuery.execute();
-		if (!aExec.hasNext()){
+		if (!aExec.hasNext()) {
 			aExec.close();
 			aModel.close();
 			return false;
@@ -145,10 +147,9 @@ public class DatabaseManagement {
 		// than rely on the auto commit of the underlying stardog connection.
 		aModel.begin();
 		// Query that we will run against the data we just loaded
-		String aQueryString = "SELECT ?x WHERE {\n"
-				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "+ "\"" + comp + "\"" + ". " + "\n"
-				+ "?y <C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "+ "?x" + ". " + "\n"
-				+ "}";
+		String aQueryString = "SELECT ?x WHERE {\n" + "?y skill:Name " + "\""
+				+ comp + "\"" + ". " + "\n" + "?y jobSeeker:email " + "?x"
+				+ ". " + "\n" + "}";
 
 		// Create a query...
 		SelectQuery aQuery = aConn.select(aQueryString);
@@ -173,21 +174,11 @@ public class DatabaseManagement {
 		Iterator<Competence> it = comp.iterator();
 
 		while (it.hasNext()) {
-			/*String aQueryString = "SELECT ?x WHERE {\n"
-					+ "?x <C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "
-					+ "\"" + it.next().getComp() + "\"" + ". " + "\n" + "}";
-					////////////////////////////////////////////////////////////////
-			String aQueryString = "SELECT ?y WHERE {\n"
-					+ "?y skill:Name "+ "\"" + it.next().getComp() + "\"" + "\n"
-					+ "}";*/
-			
-			//Note: Si en vez de pedir el email, pedimos el recurso, tenemos acceso a todo el recurso entero (Nombre, competencias...)
-			
-			String aQueryString = "SELECT ?x WHERE {\n"
-					+ "?y skill:Name "+ "\"" + it.next().getComp() + "\"" + ". " + "\n"
-					+ "?y jobSeeker:email "+ "?x" + ". " + "\n"
-					+ "}";
-			
+
+			String aQueryString = "SELECT ?x WHERE {\n" + "?y skill:Name "
+					+ "\"" + it.next().getComp() + "\"" + ". " + "\n"
+					+ "?y jobSeeker:email " + "?x" + ". " + "\n" + "}";
+
 			SelectQuery aQuery = aConn.select(aQueryString);
 			TupleQueryResult aExec = aQuery.execute();
 			prints.printResults(aExec);
@@ -202,9 +193,7 @@ public class DatabaseManagement {
 	public Vector<String> findPeopleByCompetences(Connection aConn,
 			Vector<Competence> vec) throws Exception {
 
-		UtilFunctions func = new UtilFunctions();
 		Vector<String> vecO = new Vector<String>();
-		HashMap<String, String> hash = new HashMap<String, String>();
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
@@ -213,30 +202,31 @@ public class DatabaseManagement {
 		TupleQueryResult aExec = aQuery.execute();
 		// printResults(aExec);
 		func.intoVectorResults(aExec, vecO);
-		func.resultIntoHashMap(vecO, hash);
 		// func.printVector(vecO);
 
 		return vecO;
 	}
-	public Vector<String> finalList (Connection aConn, Vector<Competence> vec) throws Exception{
-		return recommenderIntersection(recListLikes(),recListNeeds(aConn, vec));
+
+	public Vector<String> finalList(Connection aConn, Vector<Competence> vec)
+			throws Exception {
+		return recommenderIntersection(recListLikes(), recListNeeds(aConn, vec));
 	}
 
-	private Vector<String> recommenderIntersection(
-			Vector<String> listLikes, Vector<String> listNeeds) {
+	private Vector<String> recommenderIntersection(Vector<String> listLikes,
+			Vector<String> listNeeds) {
 		// TODO Auto-generated method stub
-		
+
 		return null;
 	}
 
-	private Vector<String> recListNeeds(Connection aConn,
-			Vector<Competence> vec) throws Exception {
+	private Vector<String> recListNeeds(Connection aConn, Vector<Competence> vec)
+			throws Exception {
 		// TODO Auto-generated method stub
 		return findPeopleByCompetences(aConn, vec);
 	}
 
 	private Vector<String> recListLikes() {
-		Vector <String> rec = new Vector <String>();
+		Vector<String> rec = new Vector<String>();
 		return rec;
 	}
 
@@ -246,10 +236,9 @@ public class DatabaseManagement {
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + user + "> "
-				+ "jobSeeker:Full_Name " + "\"" + name
-				+ "\"" + "\n" + "}";
+		String aQueryString = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ user + "> " + "jobSeeker:Full_Name " + "\"" + name + "\""
+				+ "\n" + "}";
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -263,16 +252,21 @@ public class DatabaseManagement {
 		aConn.commit();
 		aModel.close();
 	}
-	public void insertPersonPassword(Connection aConn, String user, String password)
-			throws Exception {
+
+	/*
+	 * INSERT { ?y jobSeeker:Full_Name "Adam Pierf Jongh" } WHERE { ?y
+	 * jobSeeker:id_session "C1CB0FA7BE8507B15658768FC02B772D" }
+	 */
+
+	public void insertPersonPassword(Connection aConn, String user,
+			String password) throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + user + "> "
-				+ "jobSeeker:password " + "\"" + password
-				+ "\"" + "\n" + "}";
+		String aQueryString = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ user + "> " + "jobSeeker:password " + "\"" + password + "\""
+				+ "\n" + "}";
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -298,19 +292,25 @@ public class DatabaseManagement {
 		 * INSERT DATA { GRAPH <http://somewhere/bookStore> {
 		 * <http://example/book1> ns:price 42 } }
 		 * 
-		 * String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + user.replaceAll("\\s", "") + "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology.ttl#Name> "
-				+ "\"" + competence + "\"" + "\n" + "}";
+		 * String aQueryString = "insert data\n" + "{\n" + "<http://people" +
+		 * "/" + user.replaceAll("\\s", "") + "> " +
+		 * "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology.ttl#Name> "
+		 * + "\"" + competence + "\"" + "\n" + "}";
 		 */
-		
-		/*String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + email + "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
-				+ "\"" + "\n" + "}";*/
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + user + "> "
+		/*
+		 * String aQueryString = "insert data\n" + "{\n" + "<http://people" +
+		 * "/" + email + "> " +
+		 * "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "
+		 * + "\"" + email + "\"" + "\n" + "}";
+		 */
+
+		String aQueryString = "insert data\n"
+				+ "{\n"
+				+ "<http://people"
+				+ "/"
+				+ user
+				+ "> "
 				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "
 				+ "\"" + competence + "\"" + "\n" + "}";
 
@@ -339,15 +339,20 @@ public class DatabaseManagement {
 		}
 	}
 
-	public void insertPersonEmail(Connection aConn, String email) throws Exception{
+	public void insertPersonEmail(Connection aConn, String email)
+			throws Exception {
 		// TODO Auto-generated method stub
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + email + "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> " + "\"" + email
-				+ "\"" + "\n" + "}";
+		String aQueryString = "insert data\n"
+				+ "{\n"
+				+ "<http://people"
+				+ "/"
+				+ email
+				+ "> "
+				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "
+				+ "\"" + email + "\"" + "\n" + "}";
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -360,36 +365,263 @@ public class DatabaseManagement {
 
 		aConn.commit();
 		aModel.close();
-		
+
 	}
 
-	//AÑADIR A LA ONTOLOGÍA EL ATRIBUTO "CONTRASEÑA" PARA PODER HACER EL MATCHING ENTRE USUARIO Y CONTRASEÑA
-	//TODO: hacer pruebas
-	public boolean findPersonPassword(Connection aConn, String user,
-			String pass) throws Exception {
+	// AÑADIR A LA ONTOLOGÍA EL ATRIBUTO "CONTRASEÑA" PARA PODER HACER EL
+	// MATCHING ENTRE USUARIO Y CONTRASEÑA
+	// TODO: hacer pruebas
+	public boolean findPersonPassword(Connection aConn, String user, String pass)
+			throws Exception {
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "SELECT ?y WHERE {\n"
-				+ "?y " + "jobSeeker:password " + "\"" + pass + "\"" + ". " + "\n"
+		String aQueryString = "SELECT ?y WHERE {\n" + "?y "
+				+ "jobSeeker:password " + "\"" + pass + "\"" + ". " + "\n"
 				+ "?y " + "jobSeeker:email " + "\"" + user + "\"" + ". " + "\n"
 				+ "}";
 
 		SelectQuery aQuery = aConn.select(aQueryString);
 		TupleQueryResult aExec = aQuery.execute();
-		
-		if(aExec.hasNext()){
+
+		if (aExec.hasNext()) {
 			aExec.close();
 			aModel.close();
 			return true;
 		}
-		
+
 		aExec.close();
 		aModel.close();
 		return false;
 	}
 
+	public void assignNewSessionToken(Connection aConn, String user,
+			String session) throws StardogException {
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ user + "> " + "jobSeeker:id_session " + "\"" + session + "\""
+				+ "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+	}
+
+	public void deleteSessionToken(Connection aConn, String user)
+			throws StardogException {
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "delete where \n" + "{\n" + "<http://people"
+				+ "/" + user + "> " + "jobSeeker:id_session " + "?y" + "\n"
+				+ "}";
+
+		/*
+		 * DELETE { ?person ?property ?value } WHERE { ?person ?property ?value
+		 * ; jobSeeker:email 'babatunde@gmail.com' }
+		 */
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple borrado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+	}
+
+	// TODO: finish
+	public boolean hasSessionToken(Connection aConn, String sessionId)
+			throws StardogException {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "SELECT ?y WHERE {\n" + "?y "
+				+ "jobSeeker:id_session " + "\"" + sessionId + "\"" + "\n"
+				+ "}";
+
+		/*
+		 * DELETE { ?person ?property ?value } WHERE { ?person ?property ?value
+		 * ; jobSeeker:email 'babatunde@gmail.com' }
+		 */
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple borrado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+		return true;
+
+	}
+
+	public void deletePersonFullNameById(Connection aConn, String id) throws Exception {
+
+		// DELETE
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryDelete = "delete\n" + "{ ?y jobSeeker:Full_Name " + "?x "
+				+ "}\n" + "WHERE\n" + "{ ?y jobSeeker:id_session " + "\"" + id
+				+ "\"" + ". \n" + "?y jobSeeker:Full_Name " + "?x" + ". \n"
+				+ "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryDelete);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+	}
+
+	public void insertPersonFullNameById(Connection aConn, String id,
+			String name) throws Exception {
+
+		// INSERT
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryInsert = "insert\n" + "{ ?y jobSeeker:Full_Name " + "\""
+				+ name + "\"" + " }\n" + "where\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryInsert);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+	}
+	
+	public void deletePersonTelephoneById(Connection aConn, String id) throws Exception {
+
+		// DELETE
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryDelete = "delete\n" + "{ ?y jobSeeker:Telephone " + "?x "
+				+ "}\n" + "where\n" + "{ ?y jobSeeker:id_session " + "\"" + id
+				+ "\"" + ". \n" + "?y jobSeeker:Telephone " + "?x" + ". \n"
+				+ "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryDelete);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+	}
+
+	public void insertPersonTelephoneById(Connection aConn, String id,
+			String tlf) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "insert\n" + "{ ?y jobSeeker:Telephone " + "\""
+				+ tlf + "\"" + "}\n" + "where\n" + "{ ?y jobSeeker:id_session "
+				+ "\"" + id + "\"" + " }";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+	}
+
+	public void updatePersonAddressById(Connection aConn, String id,
+			String address) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "INSERT\n" + "{ ?y jobSeeker:Address " + "\""
+				+ address + "\"" + "}\n" + "WHERE\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+	}
+
+	public void updatePersonPostalById(Connection aConn, String id,
+			String postal) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String aQueryString = "INSERT\n" + "{ ?y jobSeeker:Postal_Code " + "\""
+				+ postal + "\"" + "}\n" + "WHERE\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+		aModel.close();
+
+	}
 
 	/*
 	 * SELECT ?x ?dumbassValue ?uglyValue WHERE { { ?x :hasCompetence "Dumbass"
