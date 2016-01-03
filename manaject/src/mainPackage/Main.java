@@ -55,20 +55,19 @@ public class Main {
 		try {
 
 //			dbm.insertPersonEmail(dbm.connectToStardog("myDb"), "motroco@gmail.com");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "motroco@gmail.com", "Motroco Moraza");
-			//
-			//	dbm.insertPersonEmail(dbm.connectToStardog("myDb"), "babatunde@gmail.com");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
-			//dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
-			//	dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "babatunde@gmail.com", "Babatunde Moraza");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "motroco@gmail.com", "Motroco Moraza");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Babatunde Moraza");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "William Wilson");
+//			dbm.insertPersonFullName(dbm.connectToStardog("myDb"), "Santiago Santiago");
+//			dbm.insertPersonCompetences("pruebaPaleto@gmail.com", comp);
+//			dbm.insertPersonCompetences("babatunde@gmail.com", comp2);
+//			dbm.insertPersonCompetences("babatunde@gmail.com", comp3);
 
-			//		dbm.insertPersonCompetences("motroco@gmail.com", comp);
-			//		dbm.insertPersonCompetences("motroco@gmail.com", comp2);
-			//dbm.insertPersonPassword(dbm.connectToStardog("myDb"), "motroco@gmail.com", "motroco");
+//			dbm.insertPersonCompetences("motroco@gmail.com", comp2);
+			dbm.insertPersonPassword(dbm.connectToStardog("myDb"), "aimarpaleto@gmail.com", "aimarpaleto");
 			//dbm.insertPersonCompetences("babatunde@gmail.com", comp2);
 			//dbm.insertPersonCompetences("Santiago Santiago", comp);
 //			dbm.deletePersonFullNameById(dbm.connectToStardog("myDb"), "B6028E83407F3B5D628CDA83717BA5B1");

@@ -288,30 +288,13 @@ public class DatabaseManagement {
 
 		aModel.begin();
 
-		/*
-		 * INSERT DATA { GRAPH <http://somewhere/bookStore> {
-		 * <http://example/book1> ns:price 42 } }
-		 * 
-		 * String aQueryString = "insert data\n" + "{\n" + "<http://people" +
-		 * "/" + user.replaceAll("\\s", "") + "> " +
-		 * "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology.ttl#Name> "
-		 * + "\"" + competence + "\"" + "\n" + "}";
-		 */
-
-		/*
-		 * String aQueryString = "insert data\n" + "{\n" + "<http://people" +
-		 * "/" + email + "> " +
-		 * "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "
-		 * + "\"" + email + "\"" + "\n" + "}";
-		 */
-
 		String aQueryString = "insert data\n"
 				+ "{\n"
 				+ "<http://people"
 				+ "/"
 				+ user
 				+ "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/SkillOntology#Name> "
+				+ "skill:Name "
 				+ "\"" + competence + "\"" + "\n" + "}";
 
 		// Create a query...
@@ -327,6 +310,59 @@ public class DatabaseManagement {
 
 		aModel.close();
 	}
+	
+	public void insertPersonCompetenceById(Connection aConn, String id,
+			String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert\n" + "{ ?y skill:Name " + "\""
+				+ competence + "\"" + " }\n" + "where\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
+		 
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+	
+	public void insertPersonAnyById(Connection aConn, String id,
+			String competence, String field) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert\n" + "{ ?y " + field + ":Name " + "\""
+				+ competence + "\"" + " }\n" + "where\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
+		 
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
 
 	public void insertPersonCompetences(String user,
 			Vector<Competence> competences) throws Exception {
@@ -351,7 +387,7 @@ public class DatabaseManagement {
 				+ "/"
 				+ email
 				+ "> "
-				+ "<C:/Users/aitor/Downloads/SEM/Ontology/rdf/JobSeekerOntology#email> "
+				+ "jobSeeker:email "
 				+ "\"" + email + "\"" + "\n" + "}";
 
 		// Create a query...
@@ -621,6 +657,15 @@ public class DatabaseManagement {
 		aConn.commit();
 		aModel.close();
 
+	}
+
+	public void showClasses(Connection aConn, boolean bool) {
+		// TODO Auto-generated method stub
+		if(bool){
+			
+		} else {
+			
+		}
 	}
 
 	/*

@@ -9,6 +9,7 @@ import org.openrdf.query.TupleQueryResult;
 
 import com.complexible.stardog.StardogException;
 import com.complexible.stardog.api.Connection;
+import com.complexible.stardog.api.SelectQuery;
 import com.complexible.stardog.api.UpdateQuery;
 import com.complexible.stardog.jena.SDJenaFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -50,8 +51,7 @@ public class UtilFunctions {
 			res.close();
 		}
 	}
-	
-	
+
 	/*
 	 * public double calculateSinglePerson(HashMap<String, Competence> hash,
 	 * String person) { Set set = hash.entrySet(); Iterator i = set.iterator();
@@ -59,24 +59,25 @@ public class UtilFunctions {
 	 * i.next(); if (m.getKey() == person) punct += (double) m.getValue(); }
 	 * return punct; }
 	 */
-	
-	//La puntuacion de una persona se va a calcular mediante el angulo del coseno de los dos vectores
+
+	// La puntuacion de una persona se va a calcular mediante el angulo del
+	// coseno de los dos vectores
 	public double calculateSinglePerson(Vector<Competence> comp,
 			Vector<String> personC) {
 		Iterator<Competence> it = comp.iterator();
 		double dividendo = 0.0;
 		double divisorPersona = 0.0;
 		double divisorComp = 0.0;
-		
+
 		while (it.hasNext()) {
 			Competence next = it.next();
 			if (personC.contains(next.getComp())) {
 				dividendo += next.getPunctuation();
 				divisorPersona += 1;
 			}
-			divisorComp += Math.pow(next.getPunctuation(),2);
+			divisorComp += Math.pow(next.getPunctuation(), 2);
 		}
-		return (dividendo/(Math.sqrt(divisorPersona)*Math.sqrt(divisorComp)));
+		return (dividendo / (Math.sqrt(divisorPersona) * Math.sqrt(divisorComp)));
 	}
 
 	public String prepareStatementSelect(Vector<Competence> vec) {
@@ -84,8 +85,8 @@ public class UtilFunctions {
 			return "";
 		Iterator<Competence> it = vec.iterator();
 		String statement = "SELECT ?x ?y WHERE {\n"
-				+ "?j jobSeeker:email ?x .\n"
-				+ "?j skill:Name " + "?y\n" + "FILTER (?y=" + "\"" + it.next().getComp() + "\""
+				+ "?j jobSeeker:email ?x .\n" + "?j skill:Name " + "?y\n"
+				+ "FILTER (?y=" + "\"" + it.next().getComp() + "\""
 				+ "^^xsd:string ";
 		while (it.hasNext()) {
 			statement = statement + "|| ?y=" + "\"" + it.next().getComp()
@@ -156,19 +157,20 @@ public class UtilFunctions {
 		}
 		return vec;
 	}
-	public void update(Connection aConn, String user, String paramToChange, String paramValue) throws StardogException{
-		
+
+	public void update(Connection aConn, String user, String paramToChange,
+			String paramValue) throws StardogException {
+
 		Model aModel = SDJenaFactory.createModel(aConn);
 		UpdateQuery aQuery;
-		
-		//DELETE 
+
+		// DELETE
 		aModel.begin();
 
 		String aQueryDelete = "delete where \n" + "{\n" + "<http://people"
-				+ "/" + user + "> "
-				+ paramToChange + " ?y" + "\n" + "}";
-		
-		 aQuery = aConn.update(aQueryDelete);
+				+ "/" + user + "> " + paramToChange + " ?y" + "\n" + "}";
+
+		aQuery = aConn.update(aQueryDelete);
 
 		// ... and run it
 		if (aQuery.execute())
@@ -178,16 +180,15 @@ public class UtilFunctions {
 
 		aConn.commit();
 		aModel.close();
-		
-		//INSERT
-		
+
+		// INSERT
+
 		aModel.begin();
 
-		String aQueryInsert = "insert data\n" + "{\n" + "<http://people"
-				+ "/" + user + "> "
-				+ paramToChange + "\" " + paramValue
-				+ "\"" + "\n" + "}";
-		
+		String aQueryInsert = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ user + "> " + paramToChange + "\" " + paramValue + "\""
+				+ "\n" + "}";
+
 		aQuery = aConn.update(aQueryInsert);
 
 		// ... and run it
@@ -198,6 +199,49 @@ public class UtilFunctions {
 
 		aConn.commit();
 		aModel.close();
+	}
+
+	public Vector<Recommended> recommenderFunctionsByLike(
+			Vector<Person> person, Vector<Competence> comp) {
+		/*
+		 * :has_job_category: OccOnt:Occupation ,
+		 * OccOnt:Computing_professionals__213
+		 * 
+		 * El sistema de recomendación por gustos para el usuario se va a llevar
+		 * a cabo teniendo en cuenta las categorías de los proyectos en los que
+		 * ya ha trabajado y el proyecto ofertado en este instante.
+		 */
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+					comp, next.getCompetences())));
+		}
+		print.printRecommendedVector(inefficientOrdering(rec));
+		return rec;
+	}
+
+	public Vector<String> showOntology(Connection aConn, String className)
+			throws StardogException, QueryEvaluationException {
+
+		Vector<String> ret = new Vector<String>();
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+		String statement = "SELECT ?x WHERE {\n" + "?x rdfs:subClassOf "
+				+ "skill:" + className + " \n" + "}";
+		SelectQuery aQuery = aConn.select(statement);
+		TupleQueryResult aExec = aQuery.execute();
+
+		while (aExec.hasNext())
+			ret.add(aExec.next().toString());
+
+		aExec.close();
+		aModel.close();
+		return ret;
+
 	}
 
 }

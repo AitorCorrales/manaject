@@ -25,6 +25,14 @@ public class PersonalData extends HttpServlet {
 			dbm.insertPersonFullNameById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("nombre") + " " + req.getParameter("ape1") + " " + req.getParameter("ape2"));
 			dbm.deletePersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId());
 			dbm.insertPersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("Telefono"));
+			dbm.deletePersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId());
+			dbm.insertPersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("Telefono"));
+			dbm.deletePersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId());
+			dbm.insertPersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("Telefono"));
+			dbm.deletePersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId());
+			dbm.insertPersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("Telefono"));
+			dbm.deletePersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId());
+			dbm.insertPersonTelephoneById(dbm.connectToStardog("myDb"), req.getSession().getId(), req.getParameter("Telefono"));
 			
 			//BORRAR LA SESIÓN ACTUAL
 			req.getSession(false).invalidate();
