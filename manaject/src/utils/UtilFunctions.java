@@ -126,7 +126,7 @@ public class UtilFunctions {
 			competenceV.add(next.substring(positions[2] + 1, positions[3]));
 		}
 		person.add(new Person(name, competenceV));
-		print.printPeopleVector(person);
+		//print.printPeopleVector(person);
 
 		return person;
 	}
@@ -141,6 +141,18 @@ public class UtilFunctions {
 					comp, next.getCompetences())));
 		}
 		print.printRecommendedVector(inefficientOrdering(rec));
+		return rec;
+	}
+	
+	public Vector<Recommended> getEstablishedCompetencePunctuationForHTML(
+			Vector<Person> person, Vector<Competence> comp) {
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+					comp, next.getCompetences())));
+		}
 		return rec;
 	}
 

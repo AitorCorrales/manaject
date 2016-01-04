@@ -60,12 +60,12 @@ public class PersonalAptitudes extends HttpServlet {
 			}
 			
 			try {
-				String[] languageValue = req.getParameterValues("language");
+				String[] languageValue = req.getParameterValues("languages");
 
 				if (languageValue.length > 0) {
 					for (int i = 0; i < languageValue.length; i++) {
 						dbm.insertPersonAnyById(dbm.connectToStardog("myDb"),
-								ident, languageValue[i], "language");
+								ident, languageValue[i], "languages");
 					}
 				}
 			} catch (Exception e) {
