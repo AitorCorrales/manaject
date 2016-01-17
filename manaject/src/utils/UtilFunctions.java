@@ -2,7 +2,6 @@ package utils;
 
 import java.util.Iterator;
 import java.util.Vector;
-import java.lang.Math;
 
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
@@ -51,6 +50,7 @@ public class UtilFunctions {
 			res.close();
 		}
 	}
+	
 
 	/*
 	 * public double calculateSinglePerson(HashMap<String, Competence> hash,
@@ -62,7 +62,7 @@ public class UtilFunctions {
 
 	// La puntuacion de una persona se va a calcular mediante el angulo del
 	// coseno de los dos vectores
-	public double calculateSinglePerson(Vector<Competence> comp,
+	public double calculateSinglePersonCoseno(Vector<Competence> comp,
 			Vector<String> personC) {
 		Iterator<Competence> it = comp.iterator();
 		double dividendo = 0.0;
@@ -71,7 +71,7 @@ public class UtilFunctions {
 
 		while (it.hasNext()) {
 			Competence next = it.next();
-			if (personC.contains(next.getComp())) {
+			if (personC.contains(getSecondPart(next.getComp()))) {
 				dividendo += next.getPunctuation();
 				divisorPersona += 1;
 			}
@@ -79,13 +79,63 @@ public class UtilFunctions {
 		}
 		return (dividendo / (Math.sqrt(divisorPersona) * Math.sqrt(divisorComp)));
 	}
+	
+	public double calculateSinglePersonSuma(Vector<Competence> comp,
+			Vector<String> personC) {
+		Iterator<Competence> it = comp.iterator();
+		double fin = 0.0;
 
-	public String prepareStatementSelect(Vector<Competence> vec) {
+		while (it.hasNext()) {
+			Competence next = it.next();
+			if (personC.contains(getSecondPart(next.getComp()))) {
+				fin += next.getPunctuation();
+			}
+		}
+		return fin;
+	}
+	
+	//La puntuación de la persona se va a calcular mediante el índice Jaccard
+	public double calculateSinglePersonJaccard(Vector<Competence> comp,
+			Vector<String> personC) {
+		Iterator<Competence> it = comp.iterator();
+		Iterator<String> it2 = personC.iterator();
+		double M11 = 0.0;
+		double M01 = 0.0;
+		double M10 = 0.0;
+
+		while (it.hasNext()) {
+			Competence next = it.next();
+			if (personC.contains(getSecondPart(next.getComp()))) {
+				M11 += next.getPunctuation();
+			} else 
+				M10 += 1;
+		}
+		//mejorable mediane intersección de vectores
+		while (it2.hasNext()){
+			String next = it2.next();
+			if(comp.contains(returnCompetenceByString(comp, next)))
+				M01 += 1;
+		}
+		return M11/(M01 + M10 + M11);
+	}
+	
+	
+	private Competence returnCompetenceByString(Vector<Competence> comp, String compName){
+		Iterator<Competence> it = comp.iterator();
+		while(it.hasNext()){
+			Competence next = it.next();
+			if(compName.equals(getSecondPart(next.getComp())))
+				return next;
+		}
+		return null;
+	}
+
+	/*public String prepareStatementSelect(Vector<Competence> vec, String etiqueta) {
 		if (vec.isEmpty())
 			return "";
 		Iterator<Competence> it = vec.iterator();
 		String statement = "SELECT ?x ?y WHERE {\n"
-				+ "?j jobSeeker:email ?x .\n" + "?j skill:Name " + "?y\n"
+				+ "?j jobSeeker:email ?x .\n" + "?j " + etiqueta + ":Name " + "?y\n"
 				+ "FILTER (?y=" + "\"" + it.next().getComp() + "\""
 				+ "^^xsd:string ";
 		while (it.hasNext()) {
@@ -94,7 +144,75 @@ public class UtilFunctions {
 		}
 		statement = statement + ")\n" + "}";
 		return statement;
+		}
+		*/
+	public String prepareStatementSelect(Vector<Competence> vec, Vector<String> etiquetas) {
+		if (vec.isEmpty())
+			return "";
+		Iterator<Competence> it = vec.iterator();
+		Iterator<String> etiqueta = etiquetas.iterator();
+		Competence nextG = null;
+		String nextEt = etiqueta.next();
+		String statement = "SELECT * WHERE\n" + "{\n" + "{\n";
+		statement += "SELECT ?x ?y WHERE {\n"
+				+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
+				+ "FILTER (?y=" + "\"" + getSecondPart(it.next().getComp()) + "\""
+				+ "^^xsd:string ";
+		while (it.hasNext()) {
+			Competence next = it.next();
+			nextG = next;
+			if(getFirstPart(next.getComp()).equals(nextEt)){
+				statement = statement + "|| ?y=" + "\"" + getSecondPart(next.getComp())
+				+ "\"" + "^^xsd:string ";
+			} else {
+				break;
+			}
+		}
+		statement = statement + ")\n" + "}\n" + "}\n";
+		
+		while (etiqueta.hasNext()){
+			nextEt = etiqueta.next();
+			statement += "UNION\n" + "{\n";
+			statement += "SELECT ?x ?y WHERE {\n"
+					+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
+					+ "FILTER (?y=" + "\"" + getSecondPart(nextG.getComp()) + "\""
+					+ "^^xsd:string ";
+			while (it.hasNext()) {
+				Competence next = it.next();
+				if(getFirstPart(next.getComp()).equals(nextEt)){
+				statement = statement + "|| ?y=" + "\"" + getSecondPart(next.getComp())
+						+ "\"" + "^^xsd:string ";
+				} else {
+					break;
+				}
+			}
+			statement = statement + ")\n" + "}\n" + "}\n";
+		}
+		statement += "}\n";		
+		return statement;
 	}
+	/*
+	 * SELECT Distinct * WHERE
+{ 
+{
+    SELECT ?x ?y WHERE 
+    {
+         ?j jobSeeker:email ?x.
+         ?j skill:Name ?y
+         FILTER(?y="Social_Skill" || ?y="ICT_Skill")
+    }
+}
+UNION
+{
+    SELECT ?x ?y WHERE 
+    {
+         ?j jobSeeker:email ?x.
+         ?j occupation:Name ?y
+         FILTER(?y="ELEMENTARY_OCCUPATIONS__9" || ?y="ARMED_FORCES__0")
+    }
+}
+}
+	 */
 
 	public Vector<Person> separateIntoLists(Vector<String> vecString) {
 
@@ -130,31 +248,141 @@ public class UtilFunctions {
 
 		return person;
 	}
+	
+	public String getFirstPart(String comp){
+		int part1 = 0;
+		int part2 = 0;
+		char [] compArray = comp.toCharArray();
+		for (int i = 0; i < compArray.length; i++) {
+			if(compArray[i]=='&')
+				part2 = i;
+		}
+		return comp.substring(part1, part2);
+	}
+	
+	public String getSecondPart(String comp){
+		int part1 = 0;
+		int part2 = comp.length();
+		char [] compArray = comp.toCharArray();
+		for (int i = 0; i < compArray.length; i++) {
+			if(compArray[i]=='&')
+				part1 = i;
+		}
+		return comp.substring(part1 + 1, part2);
+	}
 
-	public Vector<Recommended> getEstablishedCompetencePunctuation(
+	public String clearString(String email){
+		char[] chars = email.toCharArray();
+		int [] positions = new int [2];
+		int pos = 0;
+		for (int i = 0; i < chars.length; i++) {
+			if (chars[i] == '\"') {
+				positions[pos] = i;
+				pos++;
+			}
+		}
+		return email.substring(positions[0] + 1, positions[1]);
+	}
+	
+//	public Vector<Recommended> getEstablishedCompetencePunctuation(
+//			Vector<Person> person, Vector<Competence> comp) {
+//		Iterator<Person> it = person.iterator();
+//		Vector<Recommended> rec = new Vector<Recommended>();
+//		while (it.hasNext()) {
+//			Person next = it.next();
+//			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+//					comp, next.getCompetences())));
+//		}
+//		print.printRecommendedVector(inefficientOrdering(rec));
+//		return rec;
+//	}
+//	
+//	public Vector<Recommended> getEstablishedCompetencePunctuationForHTML(
+//			Vector<Person> person, Vector<Competence> comp) {
+//		Iterator<Person> it = person.iterator();
+//		Vector<Recommended> rec = new Vector<Recommended>();
+//		while (it.hasNext()) {
+//			Person next = it.next();
+//			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+//					comp, next.getCompetences())));
+//		}
+//		return rec;
+//	}
+	public Vector<Recommended> getEstablishedCompetencePunctuationCoseno(
 			Vector<Person> person, Vector<Competence> comp) {
 		Iterator<Person> it = person.iterator();
 		Vector<Recommended> rec = new Vector<Recommended>();
 		while (it.hasNext()) {
 			Person next = it.next();
-			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonCoseno(
 					comp, next.getCompetences())));
 		}
 		print.printRecommendedVector(inefficientOrdering(rec));
 		return rec;
 	}
 	
-	public Vector<Recommended> getEstablishedCompetencePunctuationForHTML(
+	public Vector<Recommended> getEstablishedCompetencePunctuationSuma(
 			Vector<Person> person, Vector<Competence> comp) {
 		Iterator<Person> it = person.iterator();
 		Vector<Recommended> rec = new Vector<Recommended>();
 		while (it.hasNext()) {
 			Person next = it.next();
-			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonSuma(
+					comp, next.getCompetences())));
+		}
+		print.printRecommendedVector(inefficientOrdering(rec));
+		return rec;
+	}
+
+	public Vector<Recommended> getEstablishedCompetencePunctuationJaccard(
+			Vector<Person> person, Vector<Competence> comp) {
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonJaccard(
+					comp, next.getCompetences())));
+		}
+		print.printRecommendedVector(inefficientOrdering(rec));
+		return rec;
+	}
+	
+	public Vector<Recommended> getEstablishedCompetencePunctuationForHTMLJaccard(
+			Vector<Person> person, Vector<Competence> comp) {
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonJaccard(
 					comp, next.getCompetences())));
 		}
 		return rec;
 	}
+	
+	public Vector<Recommended> getEstablishedCompetencePunctuationForHTMLCoseno(
+			Vector<Person> person, Vector<Competence> comp) {
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonCoseno(
+					comp, next.getCompetences())));
+		}
+		return rec;
+	}
+	
+	public Vector<Recommended> getEstablishedCompetencePunctuationForHTMLSuma(
+			Vector<Person> person, Vector<Competence> comp) {
+		Iterator<Person> it = person.iterator();
+		Vector<Recommended> rec = new Vector<Recommended>();
+		while (it.hasNext()) {
+			Person next = it.next();
+			rec.add(new Recommended(next.getFullname(), calculateSinglePersonSuma(
+					comp, next.getCompetences())));
+		}
+		return rec;
+	}
+
 
 	public Vector<Recommended> inefficientOrdering(Vector<Recommended> vec) {
 		Recommended rec;
@@ -213,26 +441,26 @@ public class UtilFunctions {
 		aModel.close();
 	}
 
-	public Vector<Recommended> recommenderFunctionsByLike(
-			Vector<Person> person, Vector<Competence> comp) {
-		/*
-		 * :has_job_category: OccOnt:Occupation ,
-		 * OccOnt:Computing_professionals__213
-		 * 
-		 * El sistema de recomendación por gustos para el usuario se va a llevar
-		 * a cabo teniendo en cuenta las categorías de los proyectos en los que
-		 * ya ha trabajado y el proyecto ofertado en este instante.
-		 */
-		Iterator<Person> it = person.iterator();
-		Vector<Recommended> rec = new Vector<Recommended>();
-		while (it.hasNext()) {
-			Person next = it.next();
-			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
-					comp, next.getCompetences())));
-		}
-		print.printRecommendedVector(inefficientOrdering(rec));
-		return rec;
-	}
+//	public Vector<Recommended> recommenderFunctionsByLike(
+//			Vector<Person> person, Vector<Competence> comp) {
+//		/*
+//		 * :has_job_category: OccOnt:Occupation ,
+//		 * OccOnt:Computing_professionals__213
+//		 * 
+//		 * El sistema de recomendación por gustos para el usuario se va a llevar
+//		 * a cabo teniendo en cuenta las categorías de los proyectos en los que
+//		 * ya ha trabajado y el proyecto ofertado en este instante.
+//		 */
+//		Iterator<Person> it = person.iterator();
+//		Vector<Recommended> rec = new Vector<Recommended>();
+//		while (it.hasNext()) {
+//			Person next = it.next();
+//			rec.add(new Recommended(next.getFullname(), calculateSinglePerson(
+//					comp, next.getCompetences())));
+//		}
+//		print.printRecommendedVector(inefficientOrdering(rec));
+//		return rec;
+//	}
 
 	public Vector<String> showOntology(Connection aConn, String className)
 			throws StardogException, QueryEvaluationException {

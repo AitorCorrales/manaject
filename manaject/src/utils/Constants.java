@@ -1,5 +1,5 @@
 package utils;
 
 public class Constants {
-	public static final int NUMBER_CANDIDATES = 2;
+	public static final String database = "myDb";
 }

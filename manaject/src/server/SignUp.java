@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import essentials.DatabaseManagement;
 
+import utils.Constants;
+
 public class SignUp extends HttpServlet {
 
 	/**
@@ -27,16 +29,17 @@ public class SignUp extends HttpServlet {
 		// String pass = req.getParameter("pass1");
 		// statement = "SELECT * FROM users WHERE " + user + "=correo";
 		try {
+			if (!req.getParameter("correo").isEmpty() && !req.getParameter("pass1").isEmpty() && !req.getParameter("pass2").isEmpty()){
 			if (req.getParameter("pass1").equals(req.getParameter("pass2"))) {
-				if (!dbm.findPersonByEmail(dbm.connectToStardog("myDb"),
+				if (!dbm.findPersonByEmail(dbm.connectToStardog(Constants.database),
 						req.getParameter("correo"))/*
 													 * req.getParameter("correo")
 													 * .equals("gb")
 													 */) {
 
-					dbm.insertPersonEmail(dbm.connectToStardog("myDb"),
+					dbm.insertPersonEmail(dbm.connectToStardog(Constants.database),
 							req.getParameter("correo"));
-					dbm.insertPersonPassword(dbm.connectToStardog("myDb"), req.getParameter("correo"),
+					dbm.insertPersonPassword(dbm.connectToStardog(Constants.database), req.getParameter("correo"),
 							req.getParameter("pass1"));
 
 					PrintWriter out = resp.getWriter();
@@ -52,7 +55,10 @@ public class SignUp extends HttpServlet {
 					response(resp, "Ese email ya est&aacute; registrado");
 				}
 			} else {
-				response(resp, "las contraseñas no coinciden");
+				response(resp, "Las contraseñas no coinciden");
+			}
+			} else {
+				response(resp,"No deben quedar campos vac&iacute;os");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

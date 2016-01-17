@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import utils.Constants;
 
 import essentials.DatabaseManagement;
 
@@ -23,9 +24,10 @@ public class Login extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
-			if (dbm.findPersonByEmail(dbm.connectToStardog("myDb"), req.getParameter("correo")) && dbm.findPersonPassword(dbm.connectToStardog("myDb"),  req.getParameter("correo"), req.getParameter("pass1"))) {
-				dbm.deleteSessionToken(dbm.connectToStardog("myDb"), req.getParameter("correo"));
-				dbm.assignNewSessionToken(dbm.connectToStardog("myDb"), req.getParameter("correo"), req.getSession(true).getId());
+			req.logout();
+			if (dbm.findPersonByEmail(dbm.connectToStardog(Constants.database), req.getParameter("correo")) && dbm.findPersonPassword(dbm.connectToStardog(Constants.database),  req.getParameter("correo"), req.getParameter("pass1"))) {
+				dbm.deleteSessionToken(dbm.connectToStardog(Constants.database), req.getParameter("correo"));
+				dbm.assignNewSessionToken(dbm.connectToStardog(Constants.database), req.getParameter("correo"), req.getSession(true).getId());
 				PrintWriter out = resp.getWriter();
 				out.println("<html>");
 				out.println("<body>");

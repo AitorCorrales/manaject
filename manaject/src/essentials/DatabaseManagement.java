@@ -2,6 +2,7 @@ package essentials;
 
 import utils.UtilFunctions;
 import utils.PrintFunctions;
+import utils.Constants;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -16,7 +17,6 @@ import com.complexible.stardog.api.UpdateQuery;
 import com.complexible.stardog.jena.SDJenaFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
-//¿HAY QUE PONER EL .TTL AL FINAL DE LOS URI PARA QUE ENTRE?
 public class DatabaseManagement {
 
 	public static PrintFunctions prints = new PrintFunctions();
@@ -71,6 +71,39 @@ public class DatabaseManagement {
 		// always close the execution
 		aExec.close();
 		aModel.close();
+
+	}
+
+	public String findEmailById(Connection aConn, String id) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		// start a transaction before adding the data. This is not required, but
+		// it is faster to group the entire add into a single transaction rather
+		// than rely on the auto commit of the underlying stardog connection.
+		aModel.begin();
+
+		// Query that we will run against the data we just loaded
+		String aQueryString = "SELECT ?y WHERE {\n"
+				+ "?x jobSeeker:id_session " + "\"" + id + "\"" + ". "
+				+ "?x jobSeeker:email " + "?y" + ". " + "\n" + "}";
+
+		// Create a query...
+		SelectQuery aQuery = aConn.select(aQueryString);
+
+		// ... and run it
+		TupleQueryResult aExec = aQuery.execute();
+		if (aExec.hasNext()) {
+			String returnable = aExec.next().toString();
+			aExec.close();
+			aModel.close();
+			return returnable;
+		}
+
+		// always close the execution
+		aExec.close();
+		aModel.close();
+		return "";
 
 	}
 
@@ -191,43 +224,21 @@ public class DatabaseManagement {
 	}
 
 	public Vector<String> findPeopleByCompetences(Connection aConn,
-			Vector<Competence> vec) throws Exception {
+			Vector<Competence> vec, Vector<String> etiquetas) throws Exception {
 
 		Vector<String> vecO = new Vector<String>();
 
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		SelectQuery aQuery = aConn.select(func.prepareStatementSelect(vec));
-		TupleQueryResult aExec = aQuery.execute();
-		// printResults(aExec);
-		func.intoVectorResults(aExec, vecO);
+			SelectQuery aQuery = aConn.select(func.prepareStatementSelect(vec,
+					etiquetas));
+			TupleQueryResult aExec = aQuery.execute();
+			// printResults(aExec);
+			func.intoVectorResults(aExec, vecO);
 		// func.printVector(vecO);
 
 		return vecO;
-	}
-
-	public Vector<String> finalList(Connection aConn, Vector<Competence> vec)
-			throws Exception {
-		return recommenderIntersection(recListLikes(), recListNeeds(aConn, vec));
-	}
-
-	private Vector<String> recommenderIntersection(Vector<String> listLikes,
-			Vector<String> listNeeds) {
-		// TODO Auto-generated method stub
-
-		return null;
-	}
-
-	private Vector<String> recListNeeds(Connection aConn, Vector<Competence> vec)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return findPeopleByCompetences(aConn, vec);
-	}
-
-	private Vector<String> recListLikes() {
-		Vector<String> rec = new Vector<String>();
-		return rec;
 	}
 
 	public void insertPersonFullName(Connection aConn, String user, String name)
@@ -288,14 +299,9 @@ public class DatabaseManagement {
 
 		aModel.begin();
 
-		String aQueryString = "insert data\n"
-				+ "{\n"
-				+ "<http://people"
-				+ "/"
-				+ user
-				+ "> "
-				+ "skill:Name "
-				+ "\"" + competence + "\"" + "\n" + "}";
+		String aQueryString = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ user + "> " + "skill:Name " + "\"" + competence + "\"" + "\n"
+				+ "}";
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -310,7 +316,7 @@ public class DatabaseManagement {
 
 		aModel.close();
 	}
-	
+
 	public void insertPersonCompetenceById(Connection aConn, String id,
 			String competence) throws Exception {
 
@@ -321,7 +327,6 @@ public class DatabaseManagement {
 		String aQueryString = "insert\n" + "{ ?y skill:Name " + "\""
 				+ competence + "\"" + " }\n" + "where\n"
 				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
-		 
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -336,7 +341,7 @@ public class DatabaseManagement {
 
 		aModel.close();
 	}
-	
+
 	public void insertPersonAnyById(Connection aConn, String id,
 			String competence, String field) throws Exception {
 
@@ -347,7 +352,6 @@ public class DatabaseManagement {
 		String aQueryString = "insert\n" + "{ ?y " + field + ":Name " + "\""
 				+ competence + "\"" + " }\n" + "where\n"
 				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
-		 
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -363,6 +367,30 @@ public class DatabaseManagement {
 		aModel.close();
 	}
 
+	public void insertPersonMotherTongueById(Connection aConn, String id,
+			String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert\n" + "{ ?y language:Mother_tongue "
+				+ "\"" + competence + "\"" + " }\n" + "where\n"
+				+ "{ ?y jobSeeker:id_session " + "\"" + id + "\"" + " }";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
 
 	public void insertPersonCompetences(String user,
 			Vector<Competence> competences) throws Exception {
@@ -370,8 +398,8 @@ public class DatabaseManagement {
 		Iterator<Competence> it = competences.iterator();
 
 		while (it.hasNext()) {
-			insertPersonCompetence(connectToStardog("myDb"), user, it.next()
-					.getComp());
+			insertPersonCompetence(connectToStardog(Constants.database), user,
+					it.next().getComp());
 		}
 	}
 
@@ -381,14 +409,9 @@ public class DatabaseManagement {
 		Model aModel = SDJenaFactory.createModel(aConn);
 		aModel.begin();
 
-		String aQueryString = "insert data\n"
-				+ "{\n"
-				+ "<http://people"
-				+ "/"
-				+ email
-				+ "> "
-				+ "jobSeeker:email "
-				+ "\"" + email + "\"" + "\n" + "}";
+		String aQueryString = "insert data\n" + "{\n" + "<http://people" + "/"
+				+ email + "> " + "jobSeeker:email " + "\"" + email + "\""
+				+ "\n" + "}";
 
 		// Create a query...
 		UpdateQuery aQuery = aConn.update(aQueryString);
@@ -402,6 +425,198 @@ public class DatabaseManagement {
 		aConn.commit();
 		aModel.close();
 
+	}
+
+	public void insertProjectCompetenceSkills(Connection aConn, String user,
+			String name, String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{ " + "<http://project" + "/"
+				+ user + "_" + name + "> " + "skill:Name " + "\"" + competence
+				+ "\"" + " " + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	public void insertProjectHead(Connection aConn, String user, String name)
+			throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{ " + "<http://project" + "/"
+				+ user + "_" + name + "> " + "jobOffer:email " + "\"" + user
+				+ "\"" + " " + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	public void insertProjectCompetenceEducation(Connection aConn, String user,
+			String name, String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://project" + "/"
+				+ user + "_" + name + "> " + "jobOffer:has_education " + "\""
+				+ competence + "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	public void insertProjectCompetenceOccupation(Connection aConn,
+			String user, String name, String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://project" + "/"
+				+ user + "_" + name + "> "
+				+ "jobOffer:requires_professional_affiliation " + "\""
+				+ competence + "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	public void insertProjectCompetenceLanguage(Connection aConn, String user,
+			String name, String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://project" + "/"
+				+ user + "_" + name + "> " + "language:Name " + "\""
+				+ competence + "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	public void insertProjectCompetenceMotherTongue(Connection aConn,
+			String user, String name, String competence) throws Exception {
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{\n" + "<http://project" + "/"
+				+ user + "_" + name + "> " + "language:Mother_tongue " + "\""
+				+ competence + "\"" + "\n" + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+	}
+
+	// public void insertProjectID(Connection aConn, String user) throws
+	// Exception {
+	//
+	// Model aModel = SDJenaFactory.createModel(aConn);
+	//
+	// aModel.begin();
+	//
+	// String aQueryString = "insert data\n"
+	// + "{\n"
+	// + "<http://project"
+	// + "/"
+	// + user
+	// + "> "
+	// + "skill:Name "
+	// + "\"" + competence + "\"" + "\n" + "}";
+	//
+	// // Create a query...
+	// UpdateQuery aQuery = aConn.update(aQueryString);
+	//
+	// // ... and run it
+	// if (aQuery.execute())
+	// System.out.println("triple insertado correctamente");
+	// else
+	// System.out.println("error al insertar triple en base de datos");
+	//
+	// aConn.commit();
+	//
+	// aModel.close();
+	// }
+
+	public void insertProjectCompetences(String user,
+			Vector<Competence> competences) throws Exception {
+
+		Iterator<Competence> it = competences.iterator();
+
+		while (it.hasNext()) {
+			insertPersonCompetence(connectToStardog(Constants.database), user,
+					it.next().getComp());
+		}
 	}
 
 	// AÑADIR A LA ONTOLOGÍA EL ATRIBUTO "CONTRASEÑA" PARA PODER HACER EL
@@ -515,7 +730,8 @@ public class DatabaseManagement {
 
 	}
 
-	public void deletePersonFullNameById(Connection aConn, String id) throws Exception {
+	public void deletePersonFullNameById(Connection aConn, String id)
+			throws Exception {
 
 		// DELETE
 		Model aModel = SDJenaFactory.createModel(aConn);
@@ -562,8 +778,9 @@ public class DatabaseManagement {
 		aConn.commit();
 		aModel.close();
 	}
-	
-	public void deletePersonTelephoneById(Connection aConn, String id) throws Exception {
+
+	public void deletePersonTelephoneById(Connection aConn, String id)
+			throws Exception {
 
 		// DELETE
 		Model aModel = SDJenaFactory.createModel(aConn);
@@ -661,10 +878,10 @@ public class DatabaseManagement {
 
 	public void showClasses(Connection aConn, boolean bool) {
 		// TODO Auto-generated method stub
-		if(bool){
-			
+		if (bool) {
+
 		} else {
-			
+
 		}
 	}
 

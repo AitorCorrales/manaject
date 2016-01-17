@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import essentials.DatabaseManagement;
 
+import utils.Constants;
+
 public class PersonalAptitudes extends HttpServlet {
 
 	private static final long serialVersionUID = -6781398296066531034L;
@@ -28,7 +30,7 @@ public class PersonalAptitudes extends HttpServlet {
 				String[] skillValue = req.getParameterValues("skills");
 				if (skillValue.length > 0) {
 					for (int i = 0; i < skillValue.length; i++) {
-						dbm.insertPersonAnyById(dbm.connectToStardog("myDb"),
+						dbm.insertPersonAnyById(dbm.connectToStardog(Constants.database),
 								ident, skillValue[i], "skill");
 					}
 				}
@@ -40,7 +42,7 @@ public class PersonalAptitudes extends HttpServlet {
 
 				if (educationValue.length > 0) {
 					for (int i = 0; i < educationValue.length; i++) {
-						dbm.insertPersonAnyById(dbm.connectToStardog("myDb"),
+						dbm.insertPersonAnyById(dbm.connectToStardog(Constants.database),
 								ident, educationValue[i], "education");
 					}
 				}
@@ -52,7 +54,7 @@ public class PersonalAptitudes extends HttpServlet {
 
 				if (professionalValue.length > 0) {
 					for (int i = 0; i < professionalValue.length; i++) {
-						dbm.insertPersonAnyById(dbm.connectToStardog("myDb"),
+						dbm.insertPersonAnyById(dbm.connectToStardog(Constants.database),
 								ident, professionalValue[i], "occupation");
 					}
 				}
@@ -64,17 +66,29 @@ public class PersonalAptitudes extends HttpServlet {
 
 				if (languageValue.length > 0) {
 					for (int i = 0; i < languageValue.length; i++) {
-						dbm.insertPersonAnyById(dbm.connectToStardog("myDb"),
-								ident, languageValue[i], "languages");
+						dbm.insertPersonAnyById(dbm.connectToStardog(Constants.database),
+								ident, languageValue[i], "language");
+					}
+				}
+			} catch (Exception e) {
+			}
+			
+			try {
+				String[] languageValue = req.getParameterValues("language");
+
+				if (languageValue.length > 0) {
+					for (int i = 0; i < languageValue.length; i++) {
+						dbm.insertPersonMotherTongueById(dbm.connectToStardog(Constants.database),
+								ident, languageValue[i]);
 					}
 				}
 			} catch (Exception e) {
 			}
 
 			/*
-			 * dbm.updatePersonAddressById(dbm.connectToStardog("myDb"),
+			 * dbm.updatePersonAddressById(dbm.connectToStardog(Constants.database),
 			 * req.getSession().getId(), req.getParameter("Telefono"));
-			 * dbm.updatePersonPostalById(dbm.connectToStardog("myDb"),
+			 * dbm.updatePersonPostalById(dbm.connectToStardog(Constants.database),
 			 * req.getSession().getId(), req.getParameter("Telefono"));
 			 */
 
@@ -91,8 +105,8 @@ public class PersonalAptitudes extends HttpServlet {
 		out.println("<html>");
 		out.println("<body>");
 		out.println("<t1>" + msg + "</t1>");
-		out.println("<a href='PersonalProfile.html'>"
-				+ "Pulse aqu&iacute; para volver al apartado de aptitudes personales"
+		out.println("<a href='projGlobal.html'>"
+				+ "Pulse aqu&iacute; para volver a la página principal"
 				+ "</a>");
 		out.println("</body>");
 		out.println("</html>");
@@ -101,9 +115,9 @@ public class PersonalAptitudes extends HttpServlet {
 	public void loadClasses(boolean dynamic) {
 		try {
 			if (dynamic)
-				dbm.showClasses(dbm.connectToStardog("myDb"), true);
+				dbm.showClasses(dbm.connectToStardog(Constants.database), true);
 			else
-				dbm.showClasses(dbm.connectToStardog("myDb"), false);
+				dbm.showClasses(dbm.connectToStardog(Constants.database), false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
