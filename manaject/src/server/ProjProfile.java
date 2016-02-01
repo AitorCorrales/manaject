@@ -39,14 +39,15 @@ public class ProjProfile extends HttpServlet {
 			if(nombre != null && numParticipantes != null){
 				
 			try {
-				Value = req.getParameterValues("skills");
 				ValueNumber = req.getParameterValues("skillsValue");
+				Value = req.getParameterValues("skills");
 				if (Value.length > 0) {
 					String eti = "skill";
 					etiquetas.add(eti);
 					for (int i = 0; i < Value.length; i++) {
 						competences.add(new Competence(eti + "&"+ Value[i], Double
 								.parseDouble(ValueNumber[i]) / 100.0));
+						System.out.println(eti + "&"+ Value[i] + ": " + ValueNumber[i]);
 						dbm.insertProjectCompetenceSkills(dbm
 								.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 								dbm.connectToStardog(Constants.database), req.getSession()
@@ -77,8 +78,8 @@ public class ProjProfile extends HttpServlet {
 			}
 
 			try {
-				Value = req.getParameterValues("professional");
 				ValueNumber = req.getParameterValues("professionalValue");
+				Value = req.getParameterValues("professional");
 				if (Value.length > 0) {
 					String eti = "occupation";
 					etiquetas.add(eti);
@@ -95,8 +96,8 @@ public class ProjProfile extends HttpServlet {
 			}
 
 			try {
-				Value = req.getParameterValues("languages");
 				ValueNumber = req.getParameterValues("languagesValue");
+				Value = req.getParameterValues("languages");
 				if (Value.length > 0) {
 					String eti = "language";
 					etiquetas.add(eti);
@@ -142,10 +143,15 @@ public class ProjProfile extends HttpServlet {
 					dbm.connectToStardog(Constants.database), req.getSession()
 					.getId())), nombre, req.getSession().getId());
 
-			response(resp, func.inefficientOrdering(func.getEstablishedCompetencePunctuationForHTMLSuma(
+			Iterator <Competence> it = competences.iterator();
+			while(it.hasNext()){
+				System.out.println(it.next().getComp());
+			}
+			
+			response(resp, func.getEstablishedCompetencePunctuationSuma(
 					func.separateIntoLists(dbm.findPeopleByCompetences(
 							dbm.connectToStardog(Constants.database), competences, etiquetas)),
-					competences)), Integer.parseInt(numParticipantes));
+					competences), Integer.parseInt(numParticipantes));
 //			response(resp, func.inefficientOrdering(func.getEstablishedCompetencePunctuationForHTMLJaccard(
 //					func.separateIntoLists(dbm.findPeopleByCompetences2(
 //							dbm.connectToStardog(Constants.database), competences, req.getSession().getId())),

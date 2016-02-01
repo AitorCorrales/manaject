@@ -176,8 +176,8 @@ public class UtilFunctions {
 		Iterator<String> etiqueta = etiquetas.iterator();
 		Competence nextG = null;
 		String nextEt = etiqueta.next();
-		String statement = "SELECT * WHERE\n" + "{\n" + "{\n";
-		statement += "SELECT ?x ?y WHERE {\n"
+		String statement = "SELECT distinct * WHERE\n" + "{\n" + "{\n";
+		statement += "SELECT distinct ?x ?y WHERE {\n"
 				+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
 				+ "FILTER (?y=" + "\"" + getSecondPart(it.next().getComp()) + "\""
 				+ "^^xsd:string ";
@@ -192,16 +192,16 @@ public class UtilFunctions {
 			}
 		}
 		statement = statement + ")\n" + "}\n" + "}\n";
-		
 		while (etiqueta.hasNext()){
 			nextEt = etiqueta.next();
 			statement += "UNION\n" + "{\n";
-			statement += "SELECT ?x ?y WHERE {\n"
+			statement += "SELECT distinct ?x ?y WHERE {\n"
 					+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
 					+ "FILTER (?y=" + "\"" + getSecondPart(nextG.getComp()) + "\""
 					+ "^^xsd:string ";
 			while (it.hasNext()) {
 				Competence next = it.next();
+				nextG = next;
 				if(getFirstPart(next.getComp()).equals(nextEt)){
 				statement = statement + "|| ?y=" + "\"" + getSecondPart(next.getComp())
 						+ "\"" + "^^xsd:string ";
@@ -211,7 +211,8 @@ public class UtilFunctions {
 			}
 			statement = statement + ")\n" + "}\n" + "}\n";
 		}
-		statement += "}\n";		
+		statement += "}\n";
+//		System.out.println(statement);
 		return statement;
 	}
 	public String prepareStatementSelectParaPruebas(Vector<Competence> vec, Vector<String> etiquetas) {
@@ -405,6 +406,40 @@ UNION
 //		}
 //		return rec;
 //	}
+	public Vector<Recommended> lastAdd(Vector <Recommended> vec){
+		Vector <Recommended> last = new Vector<Recommended>();
+		Iterator <Recommended> it = vec.iterator();
+		Iterator <Recommended> it2;
+		String piv = "";
+		double pivPunct = 0.0;
+		int position = 0;
+		int position2 = 0;
+		int removable = 0;
+		Vector<Integer> listInt = new Vector<Integer>();
+		while(it.hasNext()){
+			Recommended next = it.next();	
+			piv = next.getKey();
+			pivPunct = next.getPunct();
+			it2 = vec.listIterator(position + 1);
+			while(it2.hasNext()){
+				Recommended next2 = it2.next();
+				position2++;
+				if(next2.getKey().equals(piv)){
+					pivPunct += next2.getPunct();
+					listInt.add(position2);
+				  //  it2.remove();
+				}
+			}
+			position++;
+			position2 = position;
+			last.add(new Recommended(piv, pivPunct));
+		}
+		for (Integer integer : listInt) {
+			last.remove(integer - removable);
+			removable++;
+		}
+		return last;
+	}
 	public Vector<Recommended> getEstablishedCompetencePunctuationCoseno(
 			Vector<Person> person, Vector<Competence> comp) {
 		Iterator<Person> it = person.iterator();
@@ -414,7 +449,7 @@ UNION
 			rec.add(new Recommended(next.getFullname(), calculateSinglePersonCoseno(
 					comp, next.getCompetences())));
 		}
-		print.printRecommendedVector(inefficientOrdering(rec));
+		print.printRecommendedVector(inefficientOrdering(lastAdd(rec)));
 		return rec;
 	}
 	
@@ -427,7 +462,7 @@ UNION
 			rec.add(new Recommended(next.getFullname(), calculateSinglePersonSuma(
 					comp, next.getCompetences())));
 		}
-		print.printRecommendedVector(inefficientOrdering(rec));
+		print.printRecommendedVector(inefficientOrdering(lastAdd(rec)));
 		return rec;
 	}
 
@@ -440,7 +475,7 @@ UNION
 			rec.add(new Recommended(next.getFullname(), calculateSinglePersonJaccard(
 					comp, next.getCompetences())));
 		}
-		print.printRecommendedVector(inefficientOrdering(rec));
+		print.printRecommendedVector(inefficientOrdering(lastAdd(rec)));
 		return rec;
 	}
 	

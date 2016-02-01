@@ -56,15 +56,15 @@ public class Main {
 		search.add(new Competence("Jugador de Futbol", 0.5));
 		
 		search2.add(new Competence("skill&Social_Skill", 5.0/100.0));
-		search2.add(new Competence("skill&Technical_Skill", 20.0/100.0));
-		search2.add(new Competence("skill&ICT_Skill", 85.0/100.0));
-		search2.add(new Competence("skill&Organisational_Skill", 57.0/100.0));
+//		search2.add(new Competence("skill&Technical_Skill", 20.0/100.0));
+//		search2.add(new Competence("skill&ICT_Skill", 85.0/100.0));
+//		search2.add(new Competence("skill&Organisational_Skill", 57.0/100.0));
 		search2.add(new Competence("language&eng_English", 80.0/100.0));
-		search2.add(new Competence("language&spa__Spanish_Castilian", 80.0/100.0));
+//		search2.add(new Competence("language&spa__Spanish_Castilian", 80.0/100.0));
 		search2.add(new Competence("occupation&PROFESSIONALS__2", 20.0/100.0));
-		search2.add(new Competence("occupation&TECHNICIANS_AND_ASSOCIATE_PROFESSIONALS__3", 85.0/100.0));
+//		search2.add(new Competence("occupation&TECHNICIANS_AND_ASSOCIATE_PROFESSIONALS__3", 85.0/100.0));
 		search2.add(new Competence("education&Social_sciences_Business_and_Law__3", 57.0/100.0));
-		search2.add(new Competence("education&Agriculture_and_Veterinary__6", 80.0/100.0));
+//		search2.add(new Competence("education&Agriculture_and_Veterinary__6", 80.0/100.0));
 
 		
 		try {
@@ -101,6 +101,8 @@ public class Main {
 			Vector<String> etiquetas = new Vector<String>();
 			etiquetas.add("skill");
 			etiquetas.add("language");
+			etiquetas.add("occupation");
+			etiquetas.add("education");
 			System.out.println("///////////////COSENO////////////////");
 			rec = func.getEstablishedCompetencePunctuationCoseno(
 					func.separateIntoLists(dbm.findPeopleByCompetences(
