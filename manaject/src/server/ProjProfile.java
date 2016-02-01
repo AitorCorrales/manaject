@@ -36,7 +36,8 @@ public class ProjProfile extends HttpServlet {
 			String nombre = req.getParameter("nombre").replaceAll("\\s","");
 			String numParticipantes = req.getParameter("numero");
 			
-			if(nombre != null && numParticipantes != null){				
+			if(nombre != null && numParticipantes != null){
+				
 			try {
 				Value = req.getParameterValues("skills");
 				ValueNumber = req.getParameterValues("skillsValue");
@@ -45,7 +46,7 @@ public class ProjProfile extends HttpServlet {
 					etiquetas.add(eti);
 					for (int i = 0; i < Value.length; i++) {
 						competences.add(new Competence(eti + "&"+ Value[i], Double
-								.parseDouble(ValueNumber[i]) / 100));
+								.parseDouble(ValueNumber[i]) / 100.0));
 						dbm.insertProjectCompetenceSkills(dbm
 								.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 								dbm.connectToStardog(Constants.database), req.getSession()
@@ -54,6 +55,7 @@ public class ProjProfile extends HttpServlet {
 				}
 
 			} catch (Exception e) {
+				
 			}
 
 			try {
@@ -64,7 +66,7 @@ public class ProjProfile extends HttpServlet {
 					etiquetas.add(eti);
 					for (int i = 0; i < Value.length; i++) {
 						competences.add(new Competence(eti + "&" + Value[i], Double
-								.parseDouble(ValueNumber[i]) / 100));
+								.parseDouble(ValueNumber[i]) / 100.0));
 						dbm.insertProjectCompetenceEducation(dbm
 								.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 								dbm.connectToStardog(Constants.database), req.getSession()
@@ -82,7 +84,7 @@ public class ProjProfile extends HttpServlet {
 					etiquetas.add(eti);
 					for (int i = 0; i < Value.length; i++) {
 						competences.add(new Competence(eti + "&" + Value[i], Double
-								.parseDouble(ValueNumber[i]) / 100));
+								.parseDouble(ValueNumber[i]) / 100.0));
 						dbm.insertProjectCompetenceOccupation(dbm
 								.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 								dbm.connectToStardog(Constants.database), req.getSession()
@@ -100,7 +102,7 @@ public class ProjProfile extends HttpServlet {
 					etiquetas.add(eti);
 					for (int i = 0; i < Value.length; i++) {
 						competences.add(new Competence(eti + "&" + Value[i], Double
-								.parseDouble(ValueNumber[i]) / 100));
+								.parseDouble(ValueNumber[i]) / 100.0));
 						dbm.insertProjectCompetenceLanguage(dbm
 								.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 								dbm.connectToStardog(Constants.database), req.getSession()
@@ -135,11 +137,19 @@ public class ProjProfile extends HttpServlet {
 			dbm.insertProjectHead(dbm.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
 					dbm.connectToStardog(Constants.database), req.getSession()
 					.getId())), nombre);
+			
+			dbm.insertProjectId(dbm.connectToStardog(Constants.database), func.clearString(dbm.findEmailById(
+					dbm.connectToStardog(Constants.database), req.getSession()
+					.getId())), nombre, req.getSession().getId());
 
-			response(resp, func.inefficientOrdering(func.getEstablishedCompetencePunctuationForHTMLJaccard(
+			response(resp, func.inefficientOrdering(func.getEstablishedCompetencePunctuationForHTMLSuma(
 					func.separateIntoLists(dbm.findPeopleByCompetences(
 							dbm.connectToStardog(Constants.database), competences, etiquetas)),
 					competences)), Integer.parseInt(numParticipantes));
+//			response(resp, func.inefficientOrdering(func.getEstablishedCompetencePunctuationForHTMLJaccard(
+//					func.separateIntoLists(dbm.findPeopleByCompetences2(
+//							dbm.connectToStardog(Constants.database), competences, req.getSession().getId())),
+//					competences)), Integer.parseInt(numParticipantes));
 				} else
 					responseError(resp, "Debe ponerle un nombre al proyecto");
 

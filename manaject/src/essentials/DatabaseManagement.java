@@ -240,6 +240,24 @@ public class DatabaseManagement {
 
 		return vecO;
 	}
+	
+	public Vector<String> findPeopleByCompetences2(Connection aConn,
+			Vector<Competence> vec, String id) throws Exception {
+
+		Vector<String> vecO = new Vector<String>();
+
+		Model aModel = SDJenaFactory.createModel(aConn);
+		aModel.begin();
+
+			SelectQuery aQuery = aConn.select(func.prepareStatementSelect2(vec,
+					id));
+			TupleQueryResult aExec = aQuery.execute();
+			// printResults(aExec);
+			func.intoVectorResults(aExec, vecO);
+		// func.printVector(vecO);
+
+		return vecO;
+	}
 
 	public void insertPersonFullName(Connection aConn, String user, String name)
 			throws Exception {
@@ -646,6 +664,49 @@ public class DatabaseManagement {
 		aModel.close();
 		return false;
 	}
+	
+	public String findProjectSkills(Connection aConn, String session)
+			throws Exception {
+
+
+		return "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "skill:Name " + "?y" + ". " + "\n"
+				+ "}";
+
+	}
+	
+	public String findProjectOccupations(Connection aConn, String session)
+			throws Exception {
+
+		return "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "jobOffer:requires_professional_affiliation " + "?y" + ". " + "\n"
+				+ "}";
+
+		}
+	
+	public String findProjectLanguages(Connection aConn, String session)
+			throws Exception {
+
+
+		return "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\""  + session + "\"" + ". " + "\n"
+				+ "?j " + "language:Name " + "?y" + ". " + "\n"
+				+ "}";
+
+	}
+	
+	public String findProjectEducation(Connection aConn, String session)
+			throws Exception {
+
+
+		return "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "jobOffer:has_education " + "?y" + ". " + "\n"
+				+ "}";
+
+	}
 
 	public void assignNewSessionToken(Connection aConn, String user,
 			String session) throws StardogException {
@@ -883,6 +944,32 @@ public class DatabaseManagement {
 		} else {
 
 		}
+	}
+
+	public void insertProjectId(Connection aConn,
+			String user, String name, String id) throws StardogException {
+		// TODO Auto-generated method stub
+		Model aModel = SDJenaFactory.createModel(aConn);
+
+		aModel.begin();
+
+		String aQueryString = "insert data\n" + "{ " + "<http://project" + "/"
+				+ user + "_" + name + "> " + "jobOffer:id_session " + "\"" + id
+				+ "\"" + " " + "}";
+
+		// Create a query...
+		UpdateQuery aQuery = aConn.update(aQueryString);
+
+		// ... and run it
+		if (aQuery.execute())
+			System.out.println("triple insertado correctamente");
+		else
+			System.out.println("error al insertar triple en base de datos");
+
+		aConn.commit();
+
+		aModel.close();
+		
 	}
 
 	/*

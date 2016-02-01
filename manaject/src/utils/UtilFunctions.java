@@ -110,15 +110,38 @@ public class UtilFunctions {
 			} else 
 				M10 += 1;
 		}
-		//mejorable mediane intersección de vectores
+		//mejorable mediante intersección de vectores
 		while (it2.hasNext()){
 			String next = it2.next();
 			if(comp.contains(returnCompetenceByString(comp, next)))
 				M01 += 1;
 		}
-		return M11/(M01 + M10 + M11);
+		return M11/(M01 + M10 - M11);
 	}
-	
+//	public double calculateSinglePersonJaccard(Vector<Competence> comp,
+//			Vector<String> personC) {
+//		Iterator<Competence> it = comp.iterator();
+//		Iterator<String> it2 = personC.iterator();
+//		double M11 = 0.0;
+//		double M01 = 0.0;
+//		double M10 = 0.0;
+//
+//		while (it.hasNext()) {
+//			Competence next = it.next();
+//			if (personC.contains(getSecondPart(next.getComp()))) {
+//				M11 += Math.pow(next.getPunctuation(), 2);
+//			}
+//			M10 += Math.pow(next.getPunctuation(), 2);
+//		}
+//		while (it2.hasNext()){
+//			String next = it2.next();
+//			M01 += 1;
+//		}
+//		M11 = Math.sqrt(M11);
+//		M10 = Math.sqrt(M10);
+//		M01 = Math.sqrt(M01);
+//		return M11/(M01 + M10 - M11);
+//	}
 	
 	private Competence returnCompetenceByString(Vector<Competence> comp, String compName){
 		Iterator<Competence> it = comp.iterator();
@@ -191,6 +214,80 @@ public class UtilFunctions {
 		statement += "}\n";		
 		return statement;
 	}
+	public String prepareStatementSelectParaPruebas(Vector<Competence> vec, Vector<String> etiquetas) {
+		if (vec.isEmpty())
+			return "";
+		Iterator<Competence> it = vec.iterator();
+		Iterator<String> etiqueta = etiquetas.iterator();
+		Competence nextG = null;
+		String nextEt = etiqueta.next();
+		String statement = "SELECT * WHERE\n" + "{\n" + "{\n";
+		statement += "SELECT ?x ?y WHERE {\n"
+				+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
+				+ "FILTER (?y=" + "\"" + it.next().getComp() + "\""
+				+ "^^xsd:string ";
+		while (it.hasNext()) {
+			Competence next = it.next();
+			nextG = next;
+			if(getFirstPart(next.getComp()).equals(nextEt)){
+				statement = statement + "|| ?y=" + "\"" + next.getComp()
+				+ "\"" + "^^xsd:string ";
+			} else {
+				break;
+			}
+		}
+		statement = statement + ")\n" + "}\n" + "}\n";
+		
+		while (etiqueta.hasNext()){
+			nextEt = etiqueta.next();
+			statement += "UNION\n" + "{\n";
+			statement += "SELECT ?x ?y WHERE {\n"
+					+ "?j jobSeeker:email ?x .\n" + "?j " + nextEt + ":Name " + "?y\n"
+					+ "FILTER (?y=" + "\"" + nextG.getComp() + "\""
+					+ "^^xsd:string ";
+			while (it.hasNext()) {
+				Competence next = it.next();
+				if(getFirstPart(next.getComp()).equals(nextEt)){
+				statement = statement + "|| ?y=" + "\"" + next.getComp()
+						+ "\"" + "^^xsd:string ";
+				} else {
+					break;
+				}
+			}
+			statement = statement + ")\n" + "}\n" + "}\n";
+		}
+		statement += "}\n";		
+		return statement;
+	}
+	
+	public String prepareStatementSelect2(Vector<Competence> vec, String session) {
+		if (vec.isEmpty())
+			return "";
+		String statement = "SELECT * WHERE\n" + "{\n" + "{\n";
+		statement += "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "jobOffer:has_education " + "?y" + ". " + "\n"
+				+ "}\n" + "UNION\n" + "{\n";
+		
+		statement += "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\""  + session + "\"" + ". " + "\n"
+				+ "?j " + "language:Name " + "?y" + ". " + "\n"
+				+ "}" + "UNION\n" + "{\n";
+		
+		statement += "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "jobOffer:requires_professional_affiliation " + "?y" + ". " + "\n"
+				+ "}" + "UNION\n" + "{\n";
+		
+		statement += "SELECT ?y WHERE {\n" + "?j "
+				+ "jobOffer:id_session " + "\"" + session + "\"" + ". " + "\n"
+				+ "?j " + "skill:Name " + "?y" + ". " + "\n"
+				+ "}";
+		
+		statement += "}\n";		
+		return statement;
+	}
+	
 	/*
 	 * SELECT Distinct * WHERE
 { 

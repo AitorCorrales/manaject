@@ -1,13 +1,13 @@
 package mainPackage;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 
 import essentials.Competence;
 import essentials.DatabaseManagement;
 import essentials.Person;
 import essentials.Recommended;
+import utils.Constants;
 import utils.UtilFunctions;
 //import utils.Constants;
 
@@ -55,11 +55,16 @@ public class Main {
 		search.add(new Competence("Agricultor", 0.4));
 		search.add(new Competence("Jugador de Futbol", 0.5));
 		
-		search2.add(new Competence("Social_Skill", 0.05));
-		search2.add(new Competence("Technical_Skill", 0.2));
-		search2.add(new Competence("ICT_Skill", 0.85));
-		search2.add(new Competence("Organisational_Skill", 0.57));
-		search2.add(new Competence("eng_English", 0.8));
+		search2.add(new Competence("skill&Social_Skill", 5.0/100.0));
+		search2.add(new Competence("skill&Technical_Skill", 20.0/100.0));
+		search2.add(new Competence("skill&ICT_Skill", 85.0/100.0));
+		search2.add(new Competence("skill&Organisational_Skill", 57.0/100.0));
+		search2.add(new Competence("language&eng_English", 80.0/100.0));
+		search2.add(new Competence("language&spa__Spanish_Castilian", 80.0/100.0));
+		search2.add(new Competence("occupation&PROFESSIONALS__2", 20.0/100.0));
+		search2.add(new Competence("occupation&TECHNICIANS_AND_ASSOCIATE_PROFESSIONALS__3", 85.0/100.0));
+		search2.add(new Competence("education&Social_sciences_Business_and_Law__3", 57.0/100.0));
+		search2.add(new Competence("education&Agriculture_and_Veterinary__6", 80.0/100.0));
 
 		
 		try {
@@ -93,26 +98,31 @@ public class Main {
 			// System.out.println(func.prepareStatementSelect(comp));
 			// p = func.separateIntoLists(dbm.findPeopleByCompetences(
 			// dbm.connectToStardog(Constants.database), comp));
-//			System.out.println("///////////////COSENO////////////////");
-//			rec = func.getEstablishedCompetencePunctuationCoseno(
-//					func.separateIntoLists(dbm.findPeopleByCompetences(
-//							dbm.connectToStardog(Constants.database), search2)), search2);
-//			System.out.println("////////////////SUMATORIO////////////////");
-//			rec = func.getEstablishedCompetencePunctuationSuma(
-//					func.separateIntoLists(dbm.findPeopleByCompetences(
-//							dbm.connectToStardog(Constants.database), search2)), search2);
-//			System.out.println("////////////////JACCARD////////////////");
-//			rec = func.getEstablishedCompetencePunctuationJaccard(
-//					func.separateIntoLists(dbm.findPeopleByCompetences(
-//							dbm.connectToStardog(Constants.database), search2)), search2);
-			Vector<String> eti = new Vector<String>();
-			eti.add("hola");
-			Iterator<String> it = eti.iterator();
-			String o = "hola&adios";
+			Vector<String> etiquetas = new Vector<String>();
+			etiquetas.add("skill");
+			etiquetas.add("language");
+			System.out.println("///////////////COSENO////////////////");
+			rec = func.getEstablishedCompetencePunctuationCoseno(
+					func.separateIntoLists(dbm.findPeopleByCompetences(
+							dbm.connectToStardog(Constants.database), search2, etiquetas)), search2);
+			System.out.println("////////////////SUMATORIO////////////////");
+			rec = func.getEstablishedCompetencePunctuationSuma(
+					func.separateIntoLists(dbm.findPeopleByCompetences(
+							dbm.connectToStardog(Constants.database), search2, etiquetas)), search2);
+			System.out.println("////////////////JACCARD////////////////");
+			rec = func.getEstablishedCompetencePunctuationJaccard(
+					func.separateIntoLists(dbm.findPeopleByCompetences(
+							dbm.connectToStardog(Constants.database), search2, etiquetas)), search2);
 			
-			if(func.getFirstPart(o).equals(it.next()))
-				System.out.println(func.getSecondPart(o));
 
+//			Vector <String> res = dbm.findPeopleByCompetences(
+//					dbm.connectToStardog(Constants.database), search2, etiquetas);
+//			Iterator <String> it = res.iterator();
+//			while(it.hasNext()){
+//				System.out.println(it.next());
+//			}
+			
+			
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
